@@ -26,11 +26,11 @@ This creates **context switching, lost knowledge**, and **inconsistent workflows
 ## 🧑‍💻 Users
 
 | Persona                    | Needs                                     |
-| --------------------------- | ------------------------------------------ |
-| Everyday Developer          | Quick access to snippets, commands, links |
-| AI‑First Developer          | Store prompts, workflows, contexts        |
-| Content Creator / Educator  | Save course notes, reusable code          |
-| Full‑Stack Builder          | Patterns, boilerplates, API references    |
+| -------------------------- | ----------------------------------------- |
+| Everyday Developer         | Quick access to snippets, commands, links |
+| AI‑First Developer         | Store prompts, workflows, contexts        |
+| Content Creator / Educator | Save course notes, reusable code          |
+| Full‑Stack Builder         | Patterns, boilerplates, API references    |
 
 ---
 
@@ -209,27 +209,27 @@ export const itemTagsRelations = relations(itemTags, ({ one }) => ({
 
 ## 🧱 Tech Stack
 
-| Category     | Choice                          |
-| ------------ | -------------------------------- |
-| Framework    | **Next.js (React 19)**           |
-| Language     | TypeScript                       |
-| Database     | Neon PostgreSQL + Drizzle ORM    |
-| Caching      | Redis (optional)                 |
-| File Storage | Cloudflare R2                    |
-| CSS/UI       | Tailwind CSS v4 + ShadCN         |
-| Auth         | Clerk (email + GitHub)           |
-| AI           | OpenAI gpt-5-nano                |
-| Deployment   | Hostinger VPS                    |
-| Monitoring   | Sentry (later)                   |
+| Category     | Choice                        |
+| ------------ | ----------------------------- |
+| Framework    | **Next.js (React 19)**        |
+| Language     | TypeScript                    |
+| Database     | Neon PostgreSQL + Drizzle ORM |
+| Caching      | Redis (optional)              |
+| File Storage | Cloudflare R2                 |
+| CSS/UI       | Tailwind CSS v4 + ShadCN      |
+| Auth         | Clerk (email + GitHub)        |
+| AI           | OpenAI gpt-5-nano             |
+| Deployment   | Hostinger VPS                 |
+| Monitoring   | Sentry (later)                |
 
 ---
 
 ## 💰 Monetization
 
-| Plan | Price            | Limits                   | Features                                          |
-| ---- | ---------------- | ------------------------- | -------------------------------------------------- |
-| Free | $0                | 50 items, 3 collections   | Basic search, image uploads, no AI                |
-| Pro  | $8/mo or $72/yr   | Unlimited                 | File uploads, custom types, AI features, export   |
+| Plan | Price           | Limits                  | Features                                        |
+| ---- | --------------- | ----------------------- | ----------------------------------------------- |
+| Free | $0              | 50 items, 3 collections | Basic search, image uploads, no AI              |
+| Pro  | $8/mo or $72/yr | Unlimited               | File uploads, custom types, AI features, export |
 
 > Stripe for subscriptions + webhooks for syncing
 
@@ -247,6 +247,12 @@ export const itemTagsRelations = relations(itemTags, ({ one }) => ({
 - Collapsible sidebar with filters & collections
 - Main grid/list workspace
 - Full‑screen item editor
+
+### Screenshots
+
+- Refer to the screenshots below as a base for the dashboard UI, doesn't have to be exact, use it as a reference:
+  - @context/screenshots/dashboard-ui-main.png
+  - @context/screenshots/dashboard-ui-drawer.png
 
 ### Responsive
 
