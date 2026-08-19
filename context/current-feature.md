@@ -6,16 +6,14 @@ In Progress
 
 ## Goals
 
-Dashboard UI Phase 3 (3 of 3) — main area to the right:
+Drizzle + Neon PostgreSQL Setup:
 
-- Recent collections
-- Pinned items
-- 10 recent items
-- 4 stats cards at the top (number of items, collections, favorite items, favorite collections — not in screenshot)
+- Set up Drizzle ORM with Neon PostgreSQL via `@neondatabase/serverless` + `drizzle-orm/neon-http`
+- Create initial schema based on the data models in project-overview.md
+- Sync a minimal `users` table via Clerk webhooks (idempotent upsert, no Account/Session models)
+- Add appropriate indexes and cascade deletes
 
-Uses mock data from `src/lib/mock-data.js` until a database is implemented.
-
-See @context/features/dashboard-phase-3-spec.md for full spec.
+See @context/features/database-spec.md for full spec.
 
 ## Notes
 
@@ -28,3 +26,4 @@ See @context/features/dashboard-phase-3-spec.md for full spec.
 - Project setup and boilerplate cleanup
 - Dashboard UI Phase 1: route, layout, top bar, placeholders
 - Dashboard UI Phase 2: collapsible Shadcn sidebar (collections, types, tags as collapsible groups), user avatar footer, mobile drawer
+- Dashboard UI Phase 3: recent collections, pinned items, recent items, stats cards (mock data)

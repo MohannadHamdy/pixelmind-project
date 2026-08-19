@@ -1,5 +1,10 @@
 # Coding Standards
 
+## Packages
+
+- we're using pnpm, make sure to stick to this and never try something different
+- only install packages if we absolutely need to, and don't install packages without asking me for confirmation
+
 ## TypeScript
 
 - Strict mode enabled
