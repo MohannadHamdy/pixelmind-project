@@ -2,11 +2,9 @@
 
 ## Status
 
-In Progress
+Completed
 
 ## Goals
-
-Implement the seed data script as specified in @context/features/seed-spec.md â€” populate the database with sample item types, collections, and items for development and demos.
 
 ## Notes
 
@@ -22,3 +20,5 @@ Implement the seed data script as specified in @context/features/seed-spec.md â€
 - Dashboard UI Phase 3: recent collections, pinned items, recent items, stats cards (mock data)
 - Drizzle + Neon PostgreSQL Setup: schema, migrations, Clerk webhook user sync, seed script
 - Clerk Auth Initial Setup: ClerkProvider, proxy.ts middleware, sign-in/sign-up pages, dashboard route protection, landing page and sidebar auth controls
+- Seed data script: populated sample item types, collections, and items for development and demos
+- Dashboard Collections: replaced mock collection cards with real data fetched from Neon via Drizzle (lib/db/collections.ts), border/gradient color and small type icons derived from each collection's most-used item type
