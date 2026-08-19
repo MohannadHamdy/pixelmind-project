@@ -10,58 +10,54 @@ import {
   users,
 } from "./schema.ts"
 import {
-  collections as mockCollections,
-  currentUser,
-  items as mockItems,
-  itemTypes as mockItemTypes,
-} from "../lib/mock-data.ts"
+  collections as seedCollections,
+  items as seedItems,
+  itemTypes as seedItemTypes,
+} from "./seed-data.ts"
 
 const db = drizzle(process.env.DATABASE_URL!)
 
-const userId = process.argv[2] ?? process.env.SEED_USER_ID
+const DEFAULT_USER_ID = "user_3I8lPX3WJ8iOSGDRqs5lkCujWks"
+const DEFAULT_USER_EMAIL = "moe@thecoachingmasters.com"
 
-if (!userId) {
-  console.error(
-    "Usage: node db/seed.ts <clerk-user-id>\n" +
-      "(or set SEED_USER_ID in .env.local)\n\n" +
-      "Grab a user ID from your Clerk dashboard, or from the `user` table\n" +
-      "after a webhook sync has run."
-  )
-  process.exit(1)
-}
+const userId = process.argv[2] ?? process.env.SEED_USER_ID ?? DEFAULT_USER_ID
+const userEmail = process.env.SEED_USER_EMAIL ?? DEFAULT_USER_EMAIL
 
 async function seed() {
   console.log(`Seeding data for user ${userId}...`)
 
   await db
     .insert(users)
-    .values({ id: userId, email: currentUser.email, isPro: currentUser.isPro })
+    .values({ id: userId, email: userEmail })
     .onConflictDoUpdate({
       target: users.id,
-      set: { email: currentUser.email, isPro: currentUser.isPro },
+      set: { email: userEmail },
     })
 
   await db
     .insert(itemTypes)
     .values(
-      mockItemTypes.map((type) => ({
+      seedItemTypes.map((type) => ({
         id: type.id,
         name: type.name,
         icon: type.icon,
+        color: type.color,
         isSystem: true,
         userId: null,
       }))
     )
-    .onConflictDoNothing()
+    .onConflictDoUpdate({
+      target: itemTypes.id,
+      set: { isSystem: true, userId: null },
+    })
 
   await db
     .insert(collections)
     .values(
-      mockCollections.map((collection) => ({
+      seedCollections.map((collection) => ({
         id: collection.id,
         name: collection.name,
         description: collection.description,
-        isFavorite: collection.isFavorite,
         userId,
       }))
     )
@@ -70,25 +66,19 @@ async function seed() {
       set: { userId },
     })
 
-  const fileTypeIds = new Set(["type_file", "type_image"])
-
   await db
     .insert(items)
     .values(
-      mockItems.map((item) => ({
+      seedItems.map((item) => ({
         id: item.id,
         title: item.title,
-        contentType: fileTypeIds.has(item.typeId) ? "file" : "text",
-        content: item.typeId === "type_url" ? null : item.content,
-        url: item.typeId === "type_url" ? item.content : null,
-        fileName: fileTypeIds.has(item.typeId) ? item.content : null,
-        isFavorite: item.isFavorite,
-        isPinned: item.isPinned,
+        contentType: item.contentType,
+        content: item.content,
+        url: item.url,
+        language: item.language,
         userId,
         typeId: item.typeId,
         collectionId: item.collectionId,
-        createdAt: new Date(item.updatedAt),
-        updatedAt: new Date(item.updatedAt),
       }))
     )
     .onConflictDoUpdate({
@@ -96,7 +86,7 @@ async function seed() {
       set: { userId },
     })
 
-  const uniqueTagNames = [...new Set(mockItems.flatMap((item) => item.tags))]
+  const uniqueTagNames = [...new Set(seedItems.flatMap((item) => item.tags))]
   const tagIdByName = new Map<string, string>(
     uniqueTagNames.map((name) => [name, `tag_${name}`])
   )
@@ -115,7 +105,7 @@ async function seed() {
   await db
     .insert(itemTags)
     .values(
-      mockItems.flatMap((item) =>
+      seedItems.flatMap((item) =>
         item.tags.map((tagName) => ({
           itemId: item.id,
           tagId: tagIdByName.get(tagName)!,
@@ -125,7 +115,7 @@ async function seed() {
     .onConflictDoNothing()
 
   console.log(
-    `Done: ${mockItemTypes.length} item types, ${mockCollections.length} collections, ${mockItems.length} items, ${uniqueTagNames.length} tags.`
+    `Done: ${seedItemTypes.length} item types, ${seedCollections.length} collections, ${seedItems.length} items, ${uniqueTagNames.length} tags.`
   )
 }
 
