@@ -14,7 +14,11 @@ function getGreeting() {
   return "Good evening"
 }
 
-export default async function DashboardPage() {
+export default async function DashboardPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ view?: string }>
+}) {
   const { userId } = await auth()
   if (!userId) return null
 
@@ -22,6 +26,7 @@ export default async function DashboardPage() {
   const firstName = user?.firstName ?? "there"
   const { totalItems, favoriteItems, pinnedItems, totalCollections } =
     await getDashboardStats(userId)
+  const view = (await searchParams).view === "list" ? "list" : "grid"
 
   return (
     <>
@@ -39,8 +44,8 @@ export default async function DashboardPage() {
         <div className="mx-auto flex max-w-6xl flex-col gap-8">
           <StatsCards />
           <CollectionsSection />
-          <PinnedItemsSection />
-          <RecentItemsSection />
+          <PinnedItemsSection view={view} />
+          <RecentItemsSection view={view} />
         </div>
       </div>
     </>

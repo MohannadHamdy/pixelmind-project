@@ -16,8 +16,51 @@ function getPreviewText(item: ItemWithRelations) {
   return item.url ?? ""
 }
 
-export function ItemCard({ item }: { item: ItemWithRelations }) {
+export function ItemCard({
+  item,
+  view = "grid",
+}: {
+  item: ItemWithRelations
+  view?: "grid" | "list"
+}) {
   const TypeIcon = iconsByName[item.type.icon] ?? FileIcon
+
+  if (view === "list") {
+    return (
+      <Card
+        size="sm"
+        className="cursor-pointer flex-row items-center gap-3 rounded-2xl px-4 py-3 transition-all duration-200 hover:-translate-y-0.5 hover:ring-2 hover:ring-foreground/10"
+      >
+        <TypeIcon
+          className="size-4 shrink-0"
+          style={{ color: item.type.color }}
+        />
+        <div className="flex min-w-0 flex-1 items-center gap-2">
+          <span className="truncate text-sm font-medium">{item.title}</span>
+          <span className="shrink-0 text-xs text-muted-foreground capitalize">
+            {item.type.name}
+            {item.collectionName ? ` · ${item.collectionName}` : ""}
+          </span>
+        </div>
+        <div className="flex min-w-0 flex-wrap items-center gap-1.5">
+          {item.tags.map((tag) => (
+            <Badge key={tag} variant="secondary">
+              #{tag}
+            </Badge>
+          ))}
+        </div>
+        <div className="flex shrink-0 items-center gap-2 text-muted-foreground">
+          {item.isPinned && <PushPinIcon className="size-3.5" weight="fill" />}
+          {item.isFavorite && (
+            <StarIcon className="size-3.5 text-amber-500" weight="fill" />
+          )}
+          <span className="text-xs">
+            {formatRelativeTime(item.updatedAt.toISOString())}
+          </span>
+        </div>
+      </Card>
+    )
+  }
 
   return (
     <Card
