@@ -144,7 +144,7 @@ export const items: Item[] = [
     id: "item_4",
     title: "Drizzle schema conventions",
     content:
-      "- singular table names (\"item\", not \"items\")\n- cuid2 primary keys via $defaultFn\n- always notNull().defaultNow() on created_at\n- $onUpdate for updated_at",
+      '- singular table names ("item", not "items")\n- cuid2 primary keys via $defaultFn\n- always notNull().defaultNow() on created_at\n- $onUpdate for updated_at',
     typeId: "type_note",
     collectionId: "col_api",
     tags: ["drizzle", "postgres", "conventions"],
@@ -236,7 +236,8 @@ export const items: Item[] = [
   {
     id: "item_12",
     title: "Neon branch per PR",
-    content: "neonctl branches create --name pr-$PR_NUMBER\n# tear down on merge",
+    content:
+      "neonctl branches create --name pr-$PR_NUMBER\n# tear down on merge",
     typeId: "type_note",
     collectionId: "col_shell",
     tags: ["neon", "ci"],

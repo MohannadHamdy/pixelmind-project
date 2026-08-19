@@ -1,12 +1,10 @@
 # Current Feature
 
-<!-- Feature Name -->
+<!-- None in progress -->
 
 ## Status
 
 <!-- Not Started|In Progress|Completed -->
-
-Not Started
 
 ## Goals
 
@@ -21,3 +19,5 @@ Not Started
 <!-- Keep this updated. Earliest to latest -->
 
 - Project setup and boilerplate cleanup
+- Dashboard UI Phase 1: route, layout, top bar, placeholders
+- Dashboard UI Phase 2: collapsible Shadcn sidebar (collections, types, tags as collapsible groups), user avatar footer, mobile drawer
