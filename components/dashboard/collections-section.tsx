@@ -1,20 +1,16 @@
+import { auth } from "@clerk/nextjs/server"
 import { ArrowUpRightIcon, StarIcon } from "@phosphor-icons/react/dist/ssr"
 
 import { Card, CardContent } from "@/components/ui/card"
-import { collections } from "@/lib/mock-data"
-import { cn } from "@/lib/utils"
+import { getRecentCollections } from "@/lib/db/collections"
+import { getTypeIcon } from "@/lib/type-icons"
 
-const collectionColorStyles: Record<string, string> = {
-  emerald: "bg-gradient-to-br from-emerald-500/25 to-emerald-500/5",
-  teal: "bg-gradient-to-br from-teal-500/25 to-teal-500/5",
-  violet: "bg-gradient-to-br from-violet-500/25 to-violet-500/5",
-  amber: "bg-gradient-to-br from-amber-500/25 to-amber-500/5",
-  rose: "bg-gradient-to-br from-rose-500/25 to-rose-500/5",
-  blue: "bg-gradient-to-br from-blue-500/25 to-blue-500/5",
-}
+export async function CollectionsSection() {
+  const { userId } = await auth()
+  if (!userId) return null
 
-export function CollectionsSection() {
-  const recentCollections = collections.slice(0, 6)
+  const recentCollections = await getRecentCollections(userId)
+  if (recentCollections.length === 0) return null
 
   return (
     <section className="flex flex-col gap-3">
@@ -22,39 +18,61 @@ export function CollectionsSection() {
         Collections
       </h3>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {recentCollections.map((collection) => (
-          <Card
-            key={collection.id}
-            size="sm"
-            className={cn(
-              collectionColorStyles[collection.color],
-              "group/collection-card cursor-pointer gap-4 rounded-2xl transition-all duration-200 hover:-translate-y-0.5 hover:ring-2 hover:ring-foreground/10"
-            )}
-          >
-            <CardContent className="flex flex-col gap-1">
-              <div className="flex items-start justify-between gap-2">
-                <span className="truncate text-sm font-medium">
-                  {collection.name}
-                </span>
-                {collection.isFavorite && (
-                  <StarIcon
-                    className="size-4 shrink-0 text-amber-500"
-                    weight="fill"
-                  />
+        {recentCollections.map((collection) => {
+          const accentColor = collection.dominantType?.color
+          return (
+            <Card
+              key={collection.id}
+              size="sm"
+              style={{
+                background: accentColor
+                  ? `linear-gradient(to bottom right, ${accentColor}26, ${accentColor}0d)`
+                  : undefined,
+                borderColor: accentColor ?? undefined,
+              }}
+              className="group/collection-card cursor-pointer gap-4 rounded-2xl border border-transparent transition-all duration-200 hover:-translate-y-0.5 hover:ring-2 hover:ring-foreground/10"
+            >
+              <CardContent className="flex flex-col gap-1">
+                <div className="flex items-start justify-between gap-2">
+                  <span className="truncate text-sm font-medium">
+                    {collection.name}
+                  </span>
+                  {collection.isFavorite && (
+                    <StarIcon
+                      className="size-4 shrink-0 text-amber-500"
+                      weight="fill"
+                    />
+                  )}
+                </div>
+                {collection.description && (
+                  <p className="line-clamp-2 text-xs text-muted-foreground">
+                    {collection.description}
+                  </p>
                 )}
-              </div>
-              <p className="line-clamp-2 text-xs text-muted-foreground">
-                {collection.description}
-              </p>
-            </CardContent>
-            <CardContent className="flex items-center justify-between text-xs text-muted-foreground">
-              <span>{collection.itemCount} items</span>
-              <span className="flex items-center gap-1 transition-transform duration-200 group-hover/collection-card:translate-x-0.5">
-                Open <ArrowUpRightIcon className="size-3.5" />
-              </span>
-            </CardContent>
-          </Card>
-        ))}
+                {collection.types.length > 0 && (
+                  <div className="mt-1 flex items-center gap-1.5">
+                    {collection.types.map((type) => {
+                      const TypeIcon = getTypeIcon(type.icon)
+                      return (
+                        <TypeIcon
+                          key={type.id}
+                          className="size-3.5"
+                          style={{ color: type.color }}
+                        />
+                      )
+                    })}
+                  </div>
+                )}
+              </CardContent>
+              <CardContent className="flex items-center justify-between text-xs text-muted-foreground">
+                <span>{collection.itemCount} items</span>
+                <span className="flex items-center gap-1 transition-transform duration-200 group-hover/collection-card:translate-x-0.5">
+                  Open <ArrowUpRightIcon className="size-3.5" />
+                </span>
+              </CardContent>
+            </Card>
+          )
+        })}
       </div>
     </section>
   )
