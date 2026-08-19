@@ -2,9 +2,11 @@
 
 ## Status
 
-Completed
+In Progress
 
 ## Goals
+
+Implement the seed data script as specified in @context/features/seed-spec.md — populate the database with sample item types, collections, and items for development and demos.
 
 ## Notes
 
