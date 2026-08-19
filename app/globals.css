@@ -116,6 +116,34 @@
     --radius-4xl: calc(var(--radius) * 2.6);
 }
 
+@utility scrollbar-slim {
+  scrollbar-color: transparent transparent;
+  transition: scrollbar-color 0.2s ease;
+
+  &:hover {
+    scrollbar-color: var(--border) transparent;
+  }
+
+  &::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: transparent;
+    border-radius: 999px;
+  }
+  &:hover::-webkit-scrollbar-thumb {
+    background: var(--border);
+  }
+}
+
+@utility grid-noise {
+  background-image:
+    linear-gradient(to right, oklch(1 0 0 / 3%) 1px, transparent 1px),
+    linear-gradient(to bottom, oklch(1 0 0 / 3%) 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
