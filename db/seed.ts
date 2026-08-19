@@ -1,6 +1,7 @@
 process.loadEnvFile(".env.local")
 
 import { drizzle } from "drizzle-orm/neon-http"
+import { sql } from "drizzle-orm"
 import {
   collections,
   itemTags,
@@ -48,7 +49,13 @@ async function seed() {
     )
     .onConflictDoUpdate({
       target: itemTypes.id,
-      set: { isSystem: true, userId: null },
+      set: {
+        name: sql`excluded.name`,
+        icon: sql`excluded.icon`,
+        color: sql`excluded.color`,
+        isSystem: true,
+        userId: null,
+      },
     })
 
   await db
