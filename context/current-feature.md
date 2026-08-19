@@ -2,7 +2,11 @@
 
 ## Status
 
-Completed
+In Progress
+
+## Feature Spec
+
+@context/features/header-spec.md
 
 ## Goals
 
