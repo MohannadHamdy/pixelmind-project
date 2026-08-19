@@ -3,8 +3,10 @@
 import Link from "next/link"
 import { useUser, UserButton } from "@clerk/nextjs"
 import {
+  ArrowLineLeftIcon,
   CaretDownIcon,
   ClockIcon,
+  FileIcon,
   FolderIcon,
   GearIcon,
   PlusIcon,
@@ -21,7 +23,6 @@ import {
   SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
-  SidebarMenuBadge,
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarTrigger,
@@ -35,15 +36,21 @@ import {
 } from "@/components/ui/collapsible"
 import { cn } from "@/lib/utils"
 import { useLocalStorage } from "@/hooks/use-local-storage"
-import { collections, currentUser, items, itemTypes } from "@/lib/mock-data"
-import { getTypeStyle } from "@/lib/type-styles"
+import { FREE_ITEM_LIMIT } from "@/lib/constants"
+import type { CollectionSummary } from "@/lib/db/collections"
+import type { ItemTypeSummary } from "@/lib/db/item-types"
+import { iconsByName } from "@/lib/type-icons"
 
 function typeSlug(name: string) {
   return `${name.toLowerCase()}s`
 }
 
-function getTags(limit: number) {
-  return Array.from(new Set(items.flatMap((item) => item.tags))).slice(0, limit)
+function SidebarCountBadge({ count }: { count: number }) {
+  return (
+    <Badge className="pointer-events-none absolute top-1/2 right-2 -translate-y-1/2 group-data-[collapsible=icon]:hidden">
+      {count}
+    </Badge>
+  )
 }
 
 function SidebarSection({
@@ -81,10 +88,22 @@ function SidebarSection({
   )
 }
 
-export function AppSidebar() {
+export function AppSidebar({
+  isPro,
+  itemCount,
+  favoriteCount,
+  collections,
+  itemTypes,
+  tags,
+}: {
+  isPro: boolean
+  itemCount: number
+  favoriteCount: number
+  collections: CollectionSummary[]
+  itemTypes: ItemTypeSummary[]
+  tags: string[]
+}) {
   const { user } = useUser()
-  const favoriteCount = items.filter((item) => item.isFavorite).length
-  const tags = getTags(8)
 
   return (
     <Sidebar collapsible="icon">
@@ -96,11 +115,14 @@ export function AppSidebar() {
           <div className="flex min-w-0 flex-1 flex-col group-data-[collapsible=icon]:hidden">
             <span className="truncate text-sm font-semibold">PixelMind</span>
             <span className="truncate text-xs text-muted-foreground">
-              {currentUser.isPro ? "Pro" : "Free"} · {currentUser.itemCount} /{" "}
-              {currentUser.itemLimit} items
+              {isPro ? "Pro" : "Free"} · {itemCount}
+              {!isPro && ` / ${FREE_ITEM_LIMIT}`} items
             </span>
           </div>
-          <SidebarTrigger className="group-data-[collapsible=icon]:hidden" />
+          <SidebarTrigger
+            icon={<ArrowLineLeftIcon />}
+            className="group-data-[collapsible=icon]:hidden"
+          />
         </div>
         <Button className="w-full group-data-[collapsible=icon]:size-8 group-data-[collapsible=icon]:p-0">
           <PlusIcon />
@@ -117,14 +139,14 @@ export function AppSidebar() {
                   <SquaresFourIcon />
                   <span>All items</span>
                 </SidebarMenuButton>
-                <SidebarMenuBadge>{currentUser.itemCount}</SidebarMenuBadge>
+                <SidebarCountBadge count={itemCount} />
               </SidebarMenuItem>
               <SidebarMenuItem>
                 <SidebarMenuButton tooltip="Favorites">
                   <StarIcon />
                   <span>Favorites</span>
                 </SidebarMenuButton>
-                <SidebarMenuBadge>{favoriteCount}</SidebarMenuBadge>
+                <SidebarCountBadge count={favoriteCount} />
               </SidebarMenuItem>
               <SidebarMenuItem>
                 <SidebarMenuButton tooltip="Recently used">
@@ -144,7 +166,7 @@ export function AppSidebar() {
                   <FolderIcon />
                   <span>{collection.name}</span>
                 </SidebarMenuButton>
-                <SidebarMenuBadge>{collection.itemCount}</SidebarMenuBadge>
+                <SidebarCountBadge count={collection.itemCount} />
               </SidebarMenuItem>
             ))}
           </SidebarMenu>
@@ -153,15 +175,15 @@ export function AppSidebar() {
         <SidebarSection title="Types" storageKey="types">
           <SidebarMenu>
             {itemTypes.map((type) => {
-              const { icon: Icon, className } = getTypeStyle(type.id)
+              const TypeIcon = iconsByName[type.icon] ?? FileIcon
               return (
                 <SidebarMenuItem key={type.id}>
                   <SidebarMenuButton
                     render={<Link href={`/items/${typeSlug(type.name)}`} />}
                     tooltip={type.name}
                   >
-                    <Icon className={className} />
-                    <span>{type.name}</span>
+                    <TypeIcon style={{ color: type.color }} />
+                    <span className="capitalize">{type.name}</span>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               )
@@ -185,7 +207,7 @@ export function AppSidebar() {
       </SidebarContent>
 
       <SidebarFooter className="gap-3 border-t border-sidebar-border p-3">
-        {!currentUser.isPro && (
+        {!isPro && (
           <div className="flex flex-col gap-2 rounded-xl bg-secondary p-3 group-data-[collapsible=icon]:hidden">
             <div className="flex flex-col gap-0.5">
               <span className="text-sm font-medium">Upgrade to Pro</span>
@@ -202,10 +224,10 @@ export function AppSidebar() {
           <UserButton />
           <div className="flex min-w-0 flex-1 flex-col group-data-[collapsible=icon]:hidden">
             <span className="truncate text-sm font-medium">
-              {user?.fullName ?? currentUser.name}
+              {user?.fullName}
             </span>
             <span className="truncate text-xs text-muted-foreground">
-              {user?.primaryEmailAddress?.emailAddress ?? currentUser.email}
+              {user?.primaryEmailAddress?.emailAddress}
             </span>
           </div>
           <Button

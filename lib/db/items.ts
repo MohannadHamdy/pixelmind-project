@@ -1,0 +1,112 @@
+import { and, count, desc, eq, sql } from "drizzle-orm"
+
+import { db } from "@/db"
+import { collections, items } from "@/db/schema"
+
+export interface ItemTypeSummary {
+  id: string
+  name: string
+  icon: string
+  color: string
+}
+
+export interface ItemWithRelations {
+  id: string
+  title: string
+  contentType: string
+  content: string | null
+  fileUrl: string | null
+  fileName: string | null
+  url: string | null
+  isFavorite: boolean
+  isPinned: boolean
+  language: string | null
+  updatedAt: Date
+  type: ItemTypeSummary
+  collectionName: string | null
+  tags: string[]
+}
+
+async function findItems(
+  userId: string,
+  { pinnedOnly, limit }: { pinnedOnly?: boolean; limit?: number }
+): Promise<ItemWithRelations[]> {
+  const rows = await db.query.items.findMany({
+    where: pinnedOnly
+      ? and(eq(items.userId, userId), eq(items.isPinned, true))
+      : eq(items.userId, userId),
+    orderBy: [desc(items.updatedAt)],
+    limit,
+    with: {
+      type: true,
+      collection: true,
+      tags: { with: { tag: true } },
+    },
+  })
+
+  return rows.map((item) => ({
+    id: item.id,
+    title: item.title,
+    contentType: item.contentType,
+    content: item.content,
+    fileUrl: item.fileUrl,
+    fileName: item.fileName,
+    url: item.url,
+    isFavorite: item.isFavorite,
+    isPinned: item.isPinned,
+    language: item.language,
+    updatedAt: item.updatedAt,
+    type: {
+      id: item.type.id,
+      name: item.type.name,
+      icon: item.type.icon ?? "File",
+      color: item.type.color ?? "#6b7280",
+    },
+    collectionName: item.collection?.name ?? null,
+    tags: item.tags.map((itemTag) => itemTag.tag.name),
+  }))
+}
+
+export function getPinnedItems(userId: string) {
+  return findItems(userId, { pinnedOnly: true })
+}
+
+export function getRecentItems(userId: string, limit = 10) {
+  return findItems(userId, { limit })
+}
+
+export interface ItemStats {
+  totalItems: number
+  favoriteItems: number
+  pinnedItems: number
+  totalCollections: number
+  favoriteCollections: number
+}
+
+export async function getDashboardStats(userId: string): Promise<ItemStats> {
+  const [[itemTotals], [collectionTotals]] = await Promise.all([
+    db
+      .select({
+        totalItems: count(),
+        favoriteItems: sql<number>`count(*) filter (where ${items.isFavorite})`,
+        pinnedItems: sql<number>`count(*) filter (where ${items.isPinned})`,
+      })
+      .from(items)
+      .where(eq(items.userId, userId)),
+    db
+      .select({
+        totalCollections: count(),
+        favoriteCollections: sql<number>`count(*) filter (where ${collections.isFavorite})`,
+      })
+      .from(collections)
+      .where(eq(collections.userId, userId)),
+  ])
+
+  return {
+    totalItems: itemTotals?.totalItems ?? 0,
+    favoriteItems: Number(itemTotals?.favoriteItems ?? 0),
+    pinnedItems: Number(itemTotals?.pinnedItems ?? 0),
+    totalCollections: collectionTotals?.totalCollections ?? 0,
+    favoriteCollections: Number(collectionTotals?.favoriteCollections ?? 0),
+  }
+}

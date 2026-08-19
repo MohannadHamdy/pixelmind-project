@@ -1,9 +1,11 @@
+import { auth, currentUser } from "@clerk/nextjs/server"
+
 import { CollectionsSection } from "@/components/dashboard/collections-section"
 import { PinnedItemsSection } from "@/components/dashboard/pinned-items-section"
 import { RecentItemsSection } from "@/components/dashboard/recent-items-section"
 import { StatsCards } from "@/components/dashboard/stats-cards"
 import { TopBar } from "@/components/dashboard/top-bar"
-import { collections, currentUser, items } from "@/lib/mock-data"
+import { getDashboardStats } from "@/lib/db/items"
 
 function getGreeting() {
   const hour = new Date().getHours()
@@ -12,10 +14,14 @@ function getGreeting() {
   return "Good evening"
 }
 
-export default function DashboardPage() {
-  const firstName = currentUser.name.split(" ")[0]
-  const favoriteCount = items.filter((item) => item.isFavorite).length
-  const pinnedCount = items.filter((item) => item.isPinned).length
+export default async function DashboardPage() {
+  const { userId } = await auth()
+  if (!userId) return null
+
+  const user = await currentUser()
+  const firstName = user?.firstName ?? "there"
+  const { totalItems, favoriteItems, pinnedItems, totalCollections } =
+    await getDashboardStats(userId)
 
   return (
     <>
@@ -25,8 +31,8 @@ export default function DashboardPage() {
           {getGreeting()}, {firstName}
         </h2>
         <p className="mt-1.5 text-sm text-muted-foreground">
-          {items.length} items across {collections.length} collections ·{" "}
-          {favoriteCount} favorites · {pinnedCount} pinned
+          {totalItems} items across {totalCollections} collections ·{" "}
+          {favoriteItems} favorites · {pinnedItems} pinned
         </p>
       </div>
       <div className="flex-1 overflow-y-auto p-6">

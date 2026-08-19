@@ -1,17 +1,23 @@
-import { PushPinIcon, StarIcon } from "@phosphor-icons/react/dist/ssr"
+import {
+  FileIcon,
+  PushPinIcon,
+  StarIcon,
+} from "@phosphor-icons/react/dist/ssr"
 
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
-import { collections, itemTypes, type Item } from "@/lib/mock-data"
-import { getTypeStyle } from "@/lib/type-styles"
-import { cn, formatRelativeTime } from "@/lib/utils"
+import type { ItemWithRelations } from "@/lib/db/items"
+import { iconsByName } from "@/lib/type-icons"
+import { formatRelativeTime } from "@/lib/utils"
 
-export function ItemCard({ item }: { item: Item }) {
-  const { icon: Icon, className: iconClassName } = getTypeStyle(item.typeId)
-  const typeName = itemTypes.find((type) => type.id === item.typeId)?.name
-  const collectionName = collections.find(
-    (collection) => collection.id === item.collectionId
-  )?.name
+function getPreviewText(item: ItemWithRelations) {
+  if (item.content) return item.content
+  if (item.contentType === "file") return item.fileName ?? "File attachment"
+  return item.url ?? ""
+}
+
+export function ItemCard({ item }: { item: ItemWithRelations }) {
+  const TypeIcon = iconsByName[item.type.icon] ?? FileIcon
 
   return (
     <Card
@@ -20,11 +26,15 @@ export function ItemCard({ item }: { item: Item }) {
     >
       <CardHeader className="flex-row items-start justify-between gap-2 space-y-0">
         <div className="flex min-w-0 items-start gap-2">
-          <Icon className={cn("mt-0.5 size-4 shrink-0", iconClassName)} />
+          <TypeIcon
+            className="mt-0.5 size-4 shrink-0"
+            style={{ color: item.type.color }}
+          />
           <div className="flex min-w-0 flex-col">
             <span className="truncate text-sm font-medium">{item.title}</span>
-            <span className="truncate text-xs text-muted-foreground">
-              {typeName} · {collectionName}
+            <span className="truncate text-xs text-muted-foreground capitalize">
+              {item.type.name}
+              {item.collectionName ? ` · ${item.collectionName}` : ""}
             </span>
           </div>
         </div>
@@ -37,7 +47,7 @@ export function ItemCard({ item }: { item: Item }) {
       </CardHeader>
       <CardContent className="flex flex-col gap-3">
         <pre className="max-h-24 overflow-hidden rounded-xl bg-muted p-3 font-mono text-xs whitespace-pre-wrap text-muted-foreground">
-          {item.content}
+          {getPreviewText(item)}
         </pre>
         <div className="flex items-center justify-between gap-2">
           <div className="flex min-w-0 flex-wrap gap-1.5">
@@ -48,7 +58,7 @@ export function ItemCard({ item }: { item: Item }) {
             ))}
           </div>
           <span className="shrink-0 text-xs text-muted-foreground">
-            {formatRelativeTime(item.updatedAt)}
+            {formatRelativeTime(item.updatedAt.toISOString())}
           </span>
         </div>
       </CardContent>

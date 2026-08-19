@@ -1,13 +1,14 @@
-import { ItemCard } from "@/components/dashboard/item-card"
-import { items } from "@/lib/mock-data"
+import { auth } from "@clerk/nextjs/server"
 
-export function RecentItemsSection() {
-  const recentItems = [...items]
-    .sort(
-      (a, b) =>
-        new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
-    )
-    .slice(0, 10)
+import { ItemCard } from "@/components/dashboard/item-card"
+import { getRecentItems } from "@/lib/db/items"
+
+export async function RecentItemsSection() {
+  const { userId } = await auth()
+  if (!userId) return null
+
+  const recentItems = await getRecentItems(userId)
+  if (recentItems.length === 0) return null
 
   return (
     <section className="flex flex-col gap-3">

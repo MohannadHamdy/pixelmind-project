@@ -19,6 +19,30 @@ export interface CollectionWithStats {
   types: CollectionTypeSummary[]
 }
 
+export interface CollectionSummary {
+  id: string
+  name: string
+  itemCount: number
+}
+
+export async function getAllCollectionsWithCounts(
+  userId: string
+): Promise<CollectionSummary[]> {
+  const rows = await db.query.collections.findMany({
+    where: eq(collections.userId, userId),
+    orderBy: [desc(collections.createdAt)],
+    with: {
+      items: { columns: { id: true } },
+    },
+  })
+
+  return rows.map((collection) => ({
+    id: collection.id,
+    name: collection.name,
+    itemCount: collection.items.length,
+  }))
+}
+
 export async function getRecentCollections(
   userId: string
 ): Promise<CollectionWithStats[]> {
