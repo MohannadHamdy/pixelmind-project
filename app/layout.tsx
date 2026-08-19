@@ -30,7 +30,7 @@ export default function RootLayout({
         robotoHeading.variable
       )}
     >
-      <body>
+      <body className="grid-noise">
         <ThemeProvider>{children}</ThemeProvider>
       </body>
     </html>

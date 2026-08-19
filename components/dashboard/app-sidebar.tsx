@@ -3,19 +3,12 @@
 import Link from "next/link"
 import {
   CaretDownIcon,
-  ChatCircleIcon,
   ClockIcon,
-  CodeIcon,
-  FileIcon,
   FolderIcon,
   GearIcon,
-  ImageIcon,
-  LinkIcon,
-  NoteIcon,
   PlusIcon,
   SquaresFourIcon,
   StarIcon,
-  TerminalIcon,
 } from "@phosphor-icons/react/dist/ssr"
 
 import {
@@ -43,17 +36,7 @@ import {
 import { cn } from "@/lib/utils"
 import { useLocalStorage } from "@/hooks/use-local-storage"
 import { collections, currentUser, items, itemTypes } from "@/lib/mock-data"
-
-const typeStyles: Record<string, { icon: typeof CodeIcon; className: string }> =
-  {
-    type_snippet: { icon: CodeIcon, className: "text-emerald-500" },
-    type_prompt: { icon: ChatCircleIcon, className: "text-blue-500" },
-    type_note: { icon: NoteIcon, className: "text-amber-500" },
-    type_command: { icon: TerminalIcon, className: "text-violet-500" },
-    type_file: { icon: FileIcon, className: "text-rose-500" },
-    type_image: { icon: ImageIcon, className: "text-sky-500" },
-    type_url: { icon: LinkIcon, className: "text-emerald-500" },
-  }
+import { getTypeStyle } from "@/lib/type-styles"
 
 function typeSlug(name: string) {
   return `${name.toLowerCase()}s`
@@ -74,10 +57,7 @@ function SidebarSection({
   title: string
   children: React.ReactNode
 }) {
-  const [open, setOpen] = useLocalStorage(
-    `sidebar-section-${storageKey}`,
-    true
-  )
+  const [open, setOpen] = useLocalStorage(`sidebar-section-${storageKey}`, true)
 
   return (
     <Collapsible
@@ -176,16 +156,11 @@ export function AppSidebar() {
         <SidebarSection title="Types" storageKey="types">
           <SidebarMenu>
             {itemTypes.map((type) => {
-              const { icon: Icon, className } = typeStyles[type.id] ?? {
-                icon: FileIcon,
-                className: "",
-              }
+              const { icon: Icon, className } = getTypeStyle(type.id)
               return (
                 <SidebarMenuItem key={type.id}>
                   <SidebarMenuButton
-                    render={
-                      <Link href={`/items/${typeSlug(type.name)}`} />
-                    }
+                    render={<Link href={`/items/${typeSlug(type.name)}`} />}
                     tooltip={type.name}
                   >
                     <Icon className={className} />
