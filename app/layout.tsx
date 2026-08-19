@@ -1,3 +1,4 @@
+import { ClerkProvider } from "@clerk/nextjs"
 import { Geist, Geist_Mono, DM_Sans, Roboto } from "next/font/google"
 
 import "./globals.css"
@@ -31,7 +32,9 @@ export default function RootLayout({
       )}
     >
       <body className="grid-noise">
-        <ThemeProvider>{children}</ThemeProvider>
+        <ClerkProvider>
+          <ThemeProvider>{children}</ThemeProvider>
+        </ClerkProvider>
       </body>
     </html>
   )

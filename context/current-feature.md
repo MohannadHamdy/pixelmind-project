@@ -19,3 +19,4 @@ Completed
 - Dashboard UI Phase 2: collapsible Shadcn sidebar (collections, types, tags as collapsible groups), user avatar footer, mobile drawer
 - Dashboard UI Phase 3: recent collections, pinned items, recent items, stats cards (mock data)
 - Drizzle + Neon PostgreSQL Setup: schema, migrations, Clerk webhook user sync, seed script
+- Clerk Auth Initial Setup: ClerkProvider, proxy.ts middleware, sign-in/sign-up pages, dashboard route protection, landing page and sidebar auth controls

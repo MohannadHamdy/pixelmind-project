@@ -1,6 +1,7 @@
 "use client"
 
 import Link from "next/link"
+import { useUser, UserButton } from "@clerk/nextjs"
 import {
   CaretDownIcon,
   ClockIcon,
@@ -25,7 +26,6 @@ import {
   SidebarMenuItem,
   SidebarTrigger,
 } from "@/components/ui/sidebar"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
@@ -82,12 +82,9 @@ function SidebarSection({
 }
 
 export function AppSidebar() {
+  const { user } = useUser()
   const favoriteCount = items.filter((item) => item.isFavorite).length
   const tags = getTags(8)
-  const initials = currentUser.name
-    .split(" ")
-    .map((part) => part[0])
-    .join("")
 
   return (
     <Sidebar collapsible="icon">
@@ -202,15 +199,13 @@ export function AppSidebar() {
           </div>
         )}
         <div className="flex items-center gap-2">
-          <Avatar size="sm" className="shrink-0">
-            <AvatarFallback>{initials}</AvatarFallback>
-          </Avatar>
+          <UserButton />
           <div className="flex min-w-0 flex-1 flex-col group-data-[collapsible=icon]:hidden">
             <span className="truncate text-sm font-medium">
-              {currentUser.name}
+              {user?.fullName ?? currentUser.name}
             </span>
             <span className="truncate text-xs text-muted-foreground">
-              {currentUser.email}
+              {user?.primaryEmailAddress?.emailAddress ?? currentUser.email}
             </span>
           </div>
           <Button
