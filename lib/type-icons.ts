@@ -10,7 +10,7 @@ import {
   TerminalIcon,
 } from "@phosphor-icons/react/dist/ssr"
 
-const iconsByName: Record<string, Icon> = {
+export const iconsByName: Record<string, Icon> = {
   Code: CodeIcon,
   CodeIcon: CodeIcon,
   Sparkles: SparkleIcon,

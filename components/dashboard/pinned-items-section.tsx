@@ -1,9 +1,13 @@
+import { auth } from "@clerk/nextjs/server"
+
 import { ItemCard } from "@/components/dashboard/item-card"
-import { items } from "@/lib/mock-data"
+import { getPinnedItems } from "@/lib/db/items"
 
-export function PinnedItemsSection() {
-  const pinnedItems = items.filter((item) => item.isPinned)
+export async function PinnedItemsSection() {
+  const { userId } = await auth()
+  if (!userId) return null
 
+  const pinnedItems = await getPinnedItems(userId)
   if (pinnedItems.length === 0) return null
 
   return (

@@ -22,3 +22,4 @@ Completed
 - Clerk Auth Initial Setup: ClerkProvider, proxy.ts middleware, sign-in/sign-up pages, dashboard route protection, landing page and sidebar auth controls
 - Seed data script: populated sample item types, collections, and items for development and demos
 - Dashboard Collections: replaced mock collection cards with real data fetched from Neon via Drizzle (lib/db/collections.ts), border/gradient color and small type icons derived from each collection's most-used item type
+- Dashboard Items (context/features/dashboard-items-spec.md): replaced mock pinned/recent items and stats with real data (lib/db/items.ts); sidebar collections, types, tags, and counts now also fetched from Neon (lib/db/item-types.ts, lib/db/tags.ts, lib/db/users.ts); sidebar polish — count badges use shadcn Badge in the theme's primary color, single sidebar-toggle trigger (left-arrow icon in sidebar when open, header icon when collapsed), opaque search input background

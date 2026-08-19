@@ -1,3 +1,4 @@
+import { auth } from "@clerk/nextjs/server"
 import {
   FolderIcon,
   SquaresFourIcon,
@@ -6,7 +7,7 @@ import {
 import type { Icon } from "@phosphor-icons/react"
 
 import { Card, CardContent } from "@/components/ui/card"
-import { collections, items } from "@/lib/mock-data"
+import { getDashboardStats } from "@/lib/db/items"
 import { cn } from "@/lib/utils"
 
 function StatCard({
@@ -40,29 +41,35 @@ function StatCard({
   )
 }
 
-export function StatsCards() {
+export async function StatsCards() {
+  const { userId } = await auth()
+  if (!userId) return null
+
+  const { totalItems, favoriteItems, totalCollections, favoriteCollections } =
+    await getDashboardStats(userId)
+
   const stats = [
     {
       label: "Items",
-      value: items.length,
+      value: totalItems,
       icon: SquaresFourIcon,
       className: "bg-emerald-500/10 text-emerald-500",
     },
     {
       label: "Collections",
-      value: collections.length,
+      value: totalCollections,
       icon: FolderIcon,
       className: "bg-blue-500/10 text-blue-500",
     },
     {
       label: "Favorite items",
-      value: items.filter((item) => item.isFavorite).length,
+      value: favoriteItems,
       icon: StarIcon,
       className: "bg-amber-500/10 text-amber-500",
     },
     {
       label: "Favorite collections",
-      value: collections.filter((collection) => collection.isFavorite).length,
+      value: favoriteCollections,
       icon: StarIcon,
       className: "bg-rose-500/10 text-rose-500",
     },

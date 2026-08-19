@@ -2,17 +2,37 @@ import { auth } from "@clerk/nextjs/server"
 
 import { AppSidebar } from "@/components/dashboard/app-sidebar"
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
+import { getAllCollectionsWithCounts } from "@/lib/db/collections"
+import { getItemTypesForUser } from "@/lib/db/item-types"
+import { getDashboardStats } from "@/lib/db/items"
+import { getTopTags } from "@/lib/db/tags"
+import { isUserPro } from "@/lib/db/users"
 
 export default async function DashboardLayout({
   children,
 }: Readonly<{
   children: React.ReactNode
 }>) {
-  await auth.protect()
+  const { userId } = await auth.protect()
+
+  const [stats, collections, itemTypes, tags, isPro] = await Promise.all([
+    getDashboardStats(userId),
+    getAllCollectionsWithCounts(userId),
+    getItemTypesForUser(userId),
+    getTopTags(userId),
+    isUserPro(userId),
+  ])
 
   return (
     <SidebarProvider>
-      <AppSidebar />
+      <AppSidebar
+        isPro={isPro}
+        itemCount={stats.totalItems}
+        favoriteCount={stats.favoriteItems}
+        collections={collections}
+        itemTypes={itemTypes}
+        tags={tags}
+      />
       <SidebarInset className="bg-transparent">{children}</SidebarInset>
     </SidebarProvider>
   )

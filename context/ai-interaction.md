@@ -7,6 +7,7 @@
 - Ask before large refactors or architectural changes
 - Don't add features not in the project spec
 - Never delete files without clarification
+- always layout a TODO list and go through it so I know what is being worked on and what's next instead of guessing
 
 ## Workflow
 
