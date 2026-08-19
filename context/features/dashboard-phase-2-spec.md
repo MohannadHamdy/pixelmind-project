@@ -6,7 +6,7 @@ This is phase 2 of 3 for the dashboard UI layout. Use the screenshot referenced 
 
 ## Requirements for phase 2
 
-- Collapsible sidebar
+- Collapsible sidebar, use Shadcn for this, there is already a Sidebar component that we can use
 - Items/types with links to /items/TYPE (eg.items/snippets)
 - Favorite collections
 - Most recent collections
