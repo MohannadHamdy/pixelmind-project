@@ -1,6 +1,7 @@
 "use client"
 
 import Link from "next/link"
+import { usePathname } from "next/navigation"
 import { useUser, UserButton } from "@clerk/nextjs"
 import {
   ArrowLineLeftIcon,
@@ -104,21 +105,29 @@ export function AppSidebar({
   tags: string[]
 }) {
   const { user } = useUser()
+  const pathname = usePathname()
 
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader className="gap-3 border-b border-sidebar-border p-3">
         <div className="flex items-center gap-2">
-          <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary text-sm font-semibold text-primary-foreground">
-            P
-          </div>
-          <div className="flex min-w-0 flex-1 flex-col group-data-[collapsible=icon]:hidden">
-            <span className="truncate text-sm font-semibold">PixelMind</span>
-            <span className="truncate text-xs text-muted-foreground">
-              {isPro ? "Pro" : "Free"} · {itemCount}
-              {!isPro && ` / ${FREE_ITEM_LIMIT}`} items
-            </span>
-          </div>
+          <Link
+            href="/dashboard"
+            className="flex min-w-0 flex-1 items-center gap-2"
+          >
+            <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary text-sm font-semibold text-primary-foreground">
+              P
+            </div>
+            <div className="flex min-w-0 flex-1 flex-col group-data-[collapsible=icon]:hidden">
+              <span className="truncate text-sm font-semibold">
+                PixelMind
+              </span>
+              <span className="truncate text-xs text-muted-foreground">
+                {isPro ? "Pro" : "Free"} · {itemCount}
+                {!isPro && ` / ${FREE_ITEM_LIMIT}`} items
+              </span>
+            </div>
+          </Link>
           <SidebarTrigger
             icon={<ArrowLineLeftIcon />}
             className="group-data-[collapsible=icon]:hidden"
@@ -135,7 +144,11 @@ export function AppSidebar({
           <SidebarGroupContent>
             <SidebarMenu>
               <SidebarMenuItem>
-                <SidebarMenuButton isActive tooltip="All items">
+                <SidebarMenuButton
+                  isActive={pathname === "/dashboard"}
+                  tooltip="All items"
+                  render={<Link href="/dashboard" />}
+                >
                   <SquaresFourIcon />
                   <span>All items</span>
                 </SidebarMenuButton>
@@ -245,6 +258,8 @@ export function AppSidebar({
             variant="ghost"
             size="icon-sm"
             className="shrink-0 group-data-[collapsible=icon]:hidden"
+            render={<Link href="/profile" />}
+            nativeButton={false}
           >
             <GearIcon />
           </Button>

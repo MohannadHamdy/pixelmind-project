@@ -1,4 +1,5 @@
 import { ClerkProvider } from "@clerk/nextjs"
+import { shadcn } from "@clerk/ui/themes"
 import { Geist, Geist_Mono, DM_Sans, Roboto } from "next/font/google"
 
 import "./globals.css"
@@ -32,7 +33,7 @@ export default function RootLayout({
       )}
     >
       <body className="grid-noise">
-        <ClerkProvider>
+        <ClerkProvider appearance={{ theme: shadcn }}>
           <ThemeProvider>{children}</ThemeProvider>
         </ClerkProvider>
       </body>

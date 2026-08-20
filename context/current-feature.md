@@ -1,14 +1,26 @@
-# Current Feature
+# Current Feature: Profile Page
 
 ## Status
 
-Completed
+In Progress
 
 ## Goals
 
+- Create profile page at `/profile` route
+- Display user info: email, name, avatar (Google or initials), account creation date
+- Show usage stats: total items, total collections, breakdown by item type
+- Add account actions: change password (email users only), delete account with confirmation
+- Follow existing codebase patterns for data fetching and components
+
 ## Notes
 
-<!-- Any extra notes -->
+- Avatar logic: use default avatar from OAuth (Google) if available, otherwise generate initials from name/email
+- Change password button should only appear for users who signed up with email/password (not Google OAuth)
+- Delete account needs confirmation dialog to prevent accidental deletion
+- On delete account, redirect to the homepage after deletion
+- Item type breakdown should show counts for each type (snippets, prompts, notes, commands, links, files, images)
+- Route should be protected (require authentication)
+- User info/auth state comes from Clerk
 
 ## History
 

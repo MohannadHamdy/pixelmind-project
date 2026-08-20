@@ -1,7 +1,7 @@
-import { and, count, desc, eq, sql } from "drizzle-orm"
+import { and, count, desc, eq, or, isNull, sql } from "drizzle-orm"
 
 import { db } from "@/db"
-import { collections, items } from "@/db/schema"
+import { collections, items, itemTypes } from "@/db/schema"
 
 export interface ItemTypeSummary {
   id: string
@@ -109,4 +109,37 @@ export async function getDashboardStats(userId: string): Promise<ItemStats> {
     totalCollections: collectionTotals?.totalCollections ?? 0,
     favoriteCollections: Number(collectionTotals?.favoriteCollections ?? 0),
   }
+}
+
+export interface ItemTypeCount extends ItemTypeSummary {
+  count: number
+}
+
+export async function getItemCountsByType(
+  userId: string
+): Promise<ItemTypeCount[]> {
+  const rows = await db
+    .select({
+      id: itemTypes.id,
+      name: itemTypes.name,
+      icon: itemTypes.icon,
+      color: itemTypes.color,
+      count: count(items.id),
+    })
+    .from(itemTypes)
+    .leftJoin(
+      items,
+      and(eq(items.typeId, itemTypes.id), eq(items.userId, userId))
+    )
+    .where(or(isNull(itemTypes.userId), eq(itemTypes.userId, userId)))
+    .groupBy(itemTypes.id)
+    .orderBy(itemTypes.name)
+
+  return rows.map((row) => ({
+    id: row.id,
+    name: row.name,
+    icon: row.icon ?? "File",
+    color: row.color ?? "#6b7280",
+    count: Number(row.count),
+  }))
 }
