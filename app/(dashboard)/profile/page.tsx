@@ -1,6 +1,9 @@
 import Link from "next/link"
 import { auth, currentUser } from "@clerk/nextjs/server"
-import { ArrowLeftIcon, CalendarBlankIcon } from "@phosphor-icons/react/dist/ssr"
+import {
+  ArrowLeftIcon,
+  CalendarBlankIcon,
+} from "@phosphor-icons/react/dist/ssr"
 
 import { AccountActions } from "@/components/dashboard/profile/account-actions"
 import { ProfileManager } from "@/components/dashboard/profile/profile-manager"
@@ -11,8 +14,7 @@ import { SidebarTrigger } from "@/components/ui/sidebar"
 import { getDashboardStats, getItemCountsByType } from "@/lib/db/items"
 
 export default async function ProfilePage() {
-  const { userId } = await auth()
-  if (!userId) return null
+  const { userId } = await auth.protect()
 
   const [user, { totalItems, totalCollections }, typeCounts] =
     await Promise.all([
@@ -38,7 +40,7 @@ export default async function ProfilePage() {
         </h1>
       </header>
       <div className="flex-1 overflow-y-auto p-6">
-        <div className="mx-auto flex w-full min-w-0 max-w-4xl flex-col gap-6">
+        <div className="mx-auto flex w-full max-w-4xl min-w-0 flex-col gap-6">
           {user && (
             <p className="flex items-center gap-1.5 text-sm text-muted-foreground">
               <CalendarBlankIcon className="size-4" />

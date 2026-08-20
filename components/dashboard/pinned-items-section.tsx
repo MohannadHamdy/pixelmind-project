@@ -8,8 +8,7 @@ export async function PinnedItemsSection({
 }: {
   view?: "grid" | "list"
 }) {
-  const { userId } = await auth()
-  if (!userId) return null
+  const { userId } = await auth.protect()
 
   const pinnedItems = await getPinnedItems(userId)
   if (pinnedItems.length === 0) return null

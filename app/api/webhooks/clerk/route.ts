@@ -34,31 +34,42 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Invalid webhook" }, { status: 400 })
   }
 
-  switch (event.type) {
-    case "user.created":
-    case "user.updated": {
-      const { id, email_addresses, primary_email_address_id } = event.data
-      const primaryEmail = email_addresses.find(
-        (e) => e.id === primary_email_address_id
-      )?.email_address
+  try {
+    switch (event.type) {
+      case "user.created":
+      case "user.updated": {
+        const { id, email_addresses, primary_email_address_id } = event.data
+        const primaryEmail = email_addresses.find(
+          (e) => e.id === primary_email_address_id
+        )?.email_address
 
-      if (!primaryEmail) break
+        if (!primaryEmail) break
 
-      await db
-        .insert(users)
-        .values({ id, email: primaryEmail })
-        .onConflictDoUpdate({
-          target: users.id,
-          set: { email: primaryEmail },
-        })
-      break
-    }
-    case "user.deleted": {
-      if (event.data.id) {
-        await db.delete(users).where(eq(users.id, event.data.id))
+        await db
+          .insert(users)
+          .values({ id, email: primaryEmail })
+          .onConflictDoUpdate({
+            target: users.id,
+            set: { email: primaryEmail },
+          })
+        break
       }
-      break
+      case "user.deleted": {
+        if (event.data.id) {
+          await db.delete(users).where(eq(users.id, event.data.id))
+        }
+        break
+      }
     }
+  } catch (error) {
+    console.error(
+      `Clerk webhook handler failed for event ${event.type}:`,
+      error
+    )
+    return NextResponse.json(
+      { error: "Webhook handler failed" },
+      { status: 500 }
+    )
   }
 
   return NextResponse.json({ received: true })

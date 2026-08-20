@@ -1,3 +1,4 @@
+import { cache } from "react"
 import { or, eq, isNull } from "drizzle-orm"
 
 import { db } from "@/db"
@@ -10,18 +11,18 @@ export interface ItemTypeSummary {
   color: string
 }
 
-export async function getItemTypesForUser(
-  userId: string
-): Promise<ItemTypeSummary[]> {
-  const rows = await db.query.itemTypes.findMany({
-    where: or(isNull(itemTypes.userId), eq(itemTypes.userId, userId)),
-    orderBy: [itemTypes.name],
-  })
+export const getItemTypesForUser = cache(
+  async (userId: string): Promise<ItemTypeSummary[]> => {
+    const rows = await db.query.itemTypes.findMany({
+      where: or(isNull(itemTypes.userId), eq(itemTypes.userId, userId)),
+      orderBy: [itemTypes.name],
+    })
 
-  return rows.map((type) => ({
-    id: type.id,
-    name: type.name,
-    icon: type.icon ?? "File",
-    color: type.color ?? "#6b7280",
-  }))
-}
+    return rows.map((type) => ({
+      id: type.id,
+      name: type.name,
+      icon: type.icon ?? "File",
+      color: type.color ?? "#6b7280",
+    }))
+  }
+)

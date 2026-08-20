@@ -42,8 +42,7 @@ function StatCard({
 }
 
 export async function StatsCards() {
-  const { userId } = await auth()
-  if (!userId) return null
+  const { userId } = await auth.protect()
 
   const { totalItems, favoriteItems, totalCollections, favoriteCollections } =
     await getDashboardStats(userId)

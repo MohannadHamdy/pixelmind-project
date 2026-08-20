@@ -1,7 +1,8 @@
-import { desc, eq } from "drizzle-orm"
+import { cache } from "react"
+import { desc, eq, inArray, count } from "drizzle-orm"
 
 import { db } from "@/db"
-import { collections } from "@/db/schema"
+import { collections, items, itemTypes } from "@/db/schema"
 
 export interface CollectionTypeSummary {
   id: string
@@ -25,76 +26,105 @@ export interface CollectionSummary {
   itemCount: number
 }
 
-export async function getAllCollectionsWithCounts(
-  userId: string
-): Promise<CollectionSummary[]> {
-  const rows = await db.query.collections.findMany({
-    where: eq(collections.userId, userId),
-    orderBy: [desc(collections.createdAt)],
-    with: {
-      items: { columns: { id: true } },
-    },
-  })
+export const getAllCollectionsWithCounts = cache(
+  async (userId: string): Promise<CollectionSummary[]> => {
+    const rows = await db
+      .select({
+        id: collections.id,
+        name: collections.name,
+        itemCount: count(items.id),
+      })
+      .from(collections)
+      .leftJoin(items, eq(items.collectionId, collections.id))
+      .where(eq(collections.userId, userId))
+      .groupBy(collections.id)
+      .orderBy(desc(collections.createdAt))
 
-  return rows.map((collection) => ({
-    id: collection.id,
-    name: collection.name,
-    itemCount: collection.items.length,
-  }))
-}
+    return rows.map((row) => ({
+      id: row.id,
+      name: row.name,
+      itemCount: Number(row.itemCount),
+    }))
+  }
+)
 
-export async function getRecentCollections(
-  userId: string
-): Promise<CollectionWithStats[]> {
-  const rows = await db.query.collections.findMany({
-    where: eq(collections.userId, userId),
-    orderBy: [desc(collections.createdAt)],
-    limit: 6,
-    with: {
-      items: {
-        with: { type: true },
-      },
-    },
-  })
+export const getRecentCollections = cache(
+  async (userId: string): Promise<CollectionWithStats[]> => {
+    const collectionRows = await db
+      .select({
+        id: collections.id,
+        name: collections.name,
+        description: collections.description,
+        isFavorite: collections.isFavorite,
+      })
+      .from(collections)
+      .where(eq(collections.userId, userId))
+      .orderBy(desc(collections.createdAt))
+      .limit(6)
 
-  return rows.map((collection) => {
-    const typeCounts = new Map<
+    if (collectionRows.length === 0) return []
+
+    const collectionIds = collectionRows.map((row) => row.id)
+
+    const typeCountRows = await db
+      .select({
+        collectionId: items.collectionId,
+        typeId: itemTypes.id,
+        typeIcon: itemTypes.icon,
+        typeColor: itemTypes.color,
+        count: count(items.id),
+      })
+      .from(items)
+      .innerJoin(itemTypes, eq(items.typeId, itemTypes.id))
+      .where(inArray(items.collectionId, collectionIds))
+      .groupBy(
+        items.collectionId,
+        itemTypes.id,
+        itemTypes.icon,
+        itemTypes.color
+      )
+
+    const typeCountsByCollection = new Map<
       string,
-      CollectionTypeSummary & { count: number }
+      (CollectionTypeSummary & { count: number })[]
     >()
-
-    for (const item of collection.items) {
-      if (!item.type) continue
-      const existing = typeCounts.get(item.type.id)
+    for (const row of typeCountRows) {
+      if (!row.collectionId) continue
+      const entry = {
+        id: row.typeId,
+        icon: row.typeIcon ?? "File",
+        color: row.typeColor ?? "#6b7280",
+        count: Number(row.count),
+      }
+      const existing = typeCountsByCollection.get(row.collectionId)
       if (existing) {
-        existing.count += 1
+        existing.push(entry)
       } else {
-        typeCounts.set(item.type.id, {
-          id: item.type.id,
-          icon: item.type.icon ?? "File",
-          color: item.type.color ?? "#6b7280",
-          count: 1,
-        })
+        typeCountsByCollection.set(row.collectionId, [entry])
       }
     }
 
-    const types = Array.from(typeCounts.values()).map(
-      ({ id, icon, color }) => ({ id, icon, color })
-    )
-    const dominant = Array.from(typeCounts.values()).reduce<
-      (CollectionTypeSummary & { count: number }) | null
-    >((max, current) => (!max || current.count > max.count ? current : max), null)
+    return collectionRows.map((collection) => {
+      const typeCounts = typeCountsByCollection.get(collection.id) ?? []
+      const itemCount = typeCounts.reduce((sum, t) => sum + t.count, 0)
+      const dominant = typeCounts.reduce<
+        (CollectionTypeSummary & { count: number }) | null
+      >(
+        (max, current) => (!max || current.count > max.count ? current : max),
+        null
+      )
 
-    return {
-      id: collection.id,
-      name: collection.name,
-      description: collection.description,
-      isFavorite: collection.isFavorite,
-      itemCount: collection.items.length,
-      dominantType: dominant
-        ? { id: dominant.id, icon: dominant.icon, color: dominant.color }
-        : null,
-      types,
-    }
-  })
-}
+      return {
+        id: collection.id,
+        name: collection.name,
+        description: collection.description,
+        isFavorite: collection.isFavorite,
+        itemCount,
+        dominantType: dominant
+          ? { id: dominant.id, icon: dominant.icon, color: dominant.color }
+          : null,
+        types: typeCounts.map(({ id, icon, color }) => ({ id, icon, color })),
+      }
+    })
+  }
+)
