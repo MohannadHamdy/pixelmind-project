@@ -1,26 +1,12 @@
-# Current Feature: Profile Page
+# Current Feature
 
 ## Status
 
-In Progress
-
 ## Goals
-
-- Create profile page at `/profile` route
-- Display user info: email, name, avatar (Google or initials), account creation date
-- Show usage stats: total items, total collections, breakdown by item type
-- Add account actions: change password (email users only), delete account with confirmation
-- Follow existing codebase patterns for data fetching and components
 
 ## Notes
 
-- Avatar logic: use default avatar from OAuth (Google) if available, otherwise generate initials from name/email
-- Change password button should only appear for users who signed up with email/password (not Google OAuth)
-- Delete account needs confirmation dialog to prevent accidental deletion
-- On delete account, redirect to the homepage after deletion
-- Item type breakdown should show counts for each type (snippets, prompts, notes, commands, links, files, images)
-- Route should be protected (require authentication)
-- User info/auth state comes from Clerk
+<!-- Any extra notes -->
 
 ## History
 
@@ -37,3 +23,4 @@ In Progress
 - Dashboard Items (context/features/dashboard-items-spec.md): replaced mock pinned/recent items and stats with real data (lib/db/items.ts); sidebar collections, types, tags, and counts now also fetched from Neon (lib/db/item-types.ts, lib/db/tags.ts, lib/db/users.ts); sidebar polish — count badges use shadcn Badge in the theme's primary color, single sidebar-toggle trigger (left-arrow icon in sidebar when open, header icon when collapsed), opaque search input background
 - Header UI changes (context/features/header-spec.md): AI ghost button, working Grid/List view switcher (synced via `view` URL search param, flows through pinned/recent item sections into ItemCard's list-row layout), custom light/dark segmented toggle (no dropdown, matches bordered pill style), New button moved to the far right — all grouped together on the right side of the top bar; fixed `grid-noise` background utility in app/globals.css to use `color-mix` with `var(--foreground)` instead of a hardcoded white line color, so the grid pattern is visible in light mode too
 - Add Pro badge to sidebar (context/features/add-pro-badge-spec.md): "File" and "Image" item types in the sidebar Types section now show a bold, uppercase "Pro" badge (ShadCN Badge, `secondary` variant) that turns primary-colored on row hover
+- Profile page (context/features/profile-spec.md): `/profile` route with usage stats (total items/collections, per-type breakdown via lib/db/items.ts `getItemCountsByType`) and a "Joined" date; account/security management (name, avatar, email, connected accounts, password) delegated to an embedded Clerk `<UserProfile>` themed with `@clerk/ui`'s shadcn theme to match app styling; custom delete-account dialog with typed confirmation, redirects to `/` after deletion; sidebar polish — brand logo links to `/dashboard`, "All items" highlight is now route-aware via `usePathname`, gear icon links to `/profile`
