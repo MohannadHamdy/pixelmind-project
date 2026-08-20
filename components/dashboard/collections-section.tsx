@@ -5,9 +5,12 @@ import { Card, CardContent } from "@/components/ui/card"
 import { getRecentCollections } from "@/lib/db/collections"
 import { getTypeIcon } from "@/lib/type-icons"
 
+// Hex alpha suffixes for the collection card's accent-color gradient (~15% and ~5% opacity).
+const GRADIENT_ALPHA_STRONG = "26"
+const GRADIENT_ALPHA_SOFT = "0d"
+
 export async function CollectionsSection() {
-  const { userId } = await auth()
-  if (!userId) return null
+  const { userId } = await auth.protect()
 
   const recentCollections = await getRecentCollections(userId)
   if (recentCollections.length === 0) return null
@@ -26,7 +29,7 @@ export async function CollectionsSection() {
               size="sm"
               style={{
                 background: accentColor
-                  ? `linear-gradient(to bottom right, ${accentColor}26, ${accentColor}0d)`
+                  ? `linear-gradient(to bottom right, ${accentColor}${GRADIENT_ALPHA_STRONG}, ${accentColor}${GRADIENT_ALPHA_SOFT})`
                   : undefined,
                 borderColor: accentColor ?? undefined,
               }}

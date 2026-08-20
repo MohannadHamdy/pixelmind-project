@@ -19,8 +19,7 @@ export default async function DashboardPage({
 }: {
   searchParams: Promise<{ view?: string }>
 }) {
-  const { userId } = await auth()
-  if (!userId) return null
+  const { userId } = await auth.protect()
 
   const user = await currentUser()
   const firstName = user?.firstName ?? "there"

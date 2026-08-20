@@ -8,8 +8,7 @@ export async function RecentItemsSection({
 }: {
   view?: "grid" | "list"
 }) {
-  const { userId } = await auth()
-  if (!userId) return null
+  const { userId } = await auth.protect()
 
   const recentItems = await getRecentItems(userId)
   if (recentItems.length === 0) return null

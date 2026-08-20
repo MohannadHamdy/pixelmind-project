@@ -1,8 +1,4 @@
-import {
-  FileIcon,
-  PushPinIcon,
-  StarIcon,
-} from "@phosphor-icons/react/dist/ssr"
+import { FileIcon, PushPinIcon, StarIcon } from "@phosphor-icons/react/dist/ssr"
 
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
@@ -14,6 +10,35 @@ function getPreviewText(item: ItemWithRelations) {
   if (item.content) return item.content
   if (item.contentType === "file") return item.fileName ?? "File attachment"
   return item.url ?? ""
+}
+
+function ItemTagList({ tags }: { tags: string[] }) {
+  return (
+    <>
+      {tags.map((tag) => (
+        <Badge key={tag} variant="secondary">
+          #{tag}
+        </Badge>
+      ))}
+    </>
+  )
+}
+
+function ItemStatusIcons({
+  isPinned,
+  isFavorite,
+}: {
+  isPinned: boolean
+  isFavorite: boolean
+}) {
+  return (
+    <>
+      {isPinned && <PushPinIcon className="size-3.5" weight="fill" />}
+      {isFavorite && (
+        <StarIcon className="size-3.5 text-amber-500" weight="fill" />
+      )}
+    </>
+  )
 }
 
 export function ItemCard({
@@ -43,17 +68,13 @@ export function ItemCard({
           </span>
         </div>
         <div className="flex min-w-0 flex-wrap items-center gap-1.5">
-          {item.tags.map((tag) => (
-            <Badge key={tag} variant="secondary">
-              #{tag}
-            </Badge>
-          ))}
+          <ItemTagList tags={item.tags} />
         </div>
         <div className="flex shrink-0 items-center gap-2 text-muted-foreground">
-          {item.isPinned && <PushPinIcon className="size-3.5" weight="fill" />}
-          {item.isFavorite && (
-            <StarIcon className="size-3.5 text-amber-500" weight="fill" />
-          )}
+          <ItemStatusIcons
+            isPinned={item.isPinned}
+            isFavorite={item.isFavorite}
+          />
           <span className="text-xs">
             {formatRelativeTime(item.updatedAt.toISOString())}
           </span>
@@ -82,10 +103,10 @@ export function ItemCard({
           </div>
         </div>
         <div className="flex shrink-0 items-center gap-1 text-muted-foreground">
-          {item.isPinned && <PushPinIcon className="size-3.5" weight="fill" />}
-          {item.isFavorite && (
-            <StarIcon className="size-3.5 text-amber-500" weight="fill" />
-          )}
+          <ItemStatusIcons
+            isPinned={item.isPinned}
+            isFavorite={item.isFavorite}
+          />
         </div>
       </CardHeader>
       <CardContent className="flex flex-col gap-3">
@@ -94,11 +115,7 @@ export function ItemCard({
         </pre>
         <div className="flex items-center justify-between gap-2">
           <div className="flex min-w-0 flex-wrap gap-1.5">
-            {item.tags.map((tag) => (
-              <Badge key={tag} variant="secondary">
-                #{tag}
-              </Badge>
-            ))}
+            <ItemTagList tags={item.tags} />
           </div>
           <span className="shrink-0 text-xs text-muted-foreground">
             {formatRelativeTime(item.updatedAt.toISOString())}

@@ -1,3 +1,4 @@
+import { cache } from "react"
 import { and, count, desc, eq, or, isNull, sql } from "drizzle-orm"
 
 import { db } from "@/db"
@@ -67,13 +68,13 @@ async function findItems(
   }))
 }
 
-export function getPinnedItems(userId: string) {
-  return findItems(userId, { pinnedOnly: true })
-}
+export const getPinnedItems = cache((userId: string) =>
+  findItems(userId, { pinnedOnly: true })
+)
 
-export function getRecentItems(userId: string, limit = 10) {
-  return findItems(userId, { limit })
-}
+export const getRecentItems = cache((userId: string, limit = 10) =>
+  findItems(userId, { limit })
+)
 
 export interface ItemStats {
   totalItems: number
@@ -83,63 +84,65 @@ export interface ItemStats {
   favoriteCollections: number
 }
 
-export async function getDashboardStats(userId: string): Promise<ItemStats> {
-  const [[itemTotals], [collectionTotals]] = await Promise.all([
-    db
-      .select({
-        totalItems: count(),
-        favoriteItems: sql<number>`count(*) filter (where ${items.isFavorite})`,
-        pinnedItems: sql<number>`count(*) filter (where ${items.isPinned})`,
-      })
-      .from(items)
-      .where(eq(items.userId, userId)),
-    db
-      .select({
-        totalCollections: count(),
-        favoriteCollections: sql<number>`count(*) filter (where ${collections.isFavorite})`,
-      })
-      .from(collections)
-      .where(eq(collections.userId, userId)),
-  ])
+export const getDashboardStats = cache(
+  async (userId: string): Promise<ItemStats> => {
+    const [[itemTotals], [collectionTotals]] = await Promise.all([
+      db
+        .select({
+          totalItems: count(),
+          favoriteItems: sql<number>`count(*) filter (where ${items.isFavorite})`,
+          pinnedItems: sql<number>`count(*) filter (where ${items.isPinned})`,
+        })
+        .from(items)
+        .where(eq(items.userId, userId)),
+      db
+        .select({
+          totalCollections: count(),
+          favoriteCollections: sql<number>`count(*) filter (where ${collections.isFavorite})`,
+        })
+        .from(collections)
+        .where(eq(collections.userId, userId)),
+    ])
 
-  return {
-    totalItems: itemTotals?.totalItems ?? 0,
-    favoriteItems: Number(itemTotals?.favoriteItems ?? 0),
-    pinnedItems: Number(itemTotals?.pinnedItems ?? 0),
-    totalCollections: collectionTotals?.totalCollections ?? 0,
-    favoriteCollections: Number(collectionTotals?.favoriteCollections ?? 0),
+    return {
+      totalItems: itemTotals?.totalItems ?? 0,
+      favoriteItems: Number(itemTotals?.favoriteItems ?? 0),
+      pinnedItems: Number(itemTotals?.pinnedItems ?? 0),
+      totalCollections: collectionTotals?.totalCollections ?? 0,
+      favoriteCollections: Number(collectionTotals?.favoriteCollections ?? 0),
+    }
   }
-}
+)
 
 export interface ItemTypeCount extends ItemTypeSummary {
   count: number
 }
 
-export async function getItemCountsByType(
-  userId: string
-): Promise<ItemTypeCount[]> {
-  const rows = await db
-    .select({
-      id: itemTypes.id,
-      name: itemTypes.name,
-      icon: itemTypes.icon,
-      color: itemTypes.color,
-      count: count(items.id),
-    })
-    .from(itemTypes)
-    .leftJoin(
-      items,
-      and(eq(items.typeId, itemTypes.id), eq(items.userId, userId))
-    )
-    .where(or(isNull(itemTypes.userId), eq(itemTypes.userId, userId)))
-    .groupBy(itemTypes.id)
-    .orderBy(itemTypes.name)
+export const getItemCountsByType = cache(
+  async (userId: string): Promise<ItemTypeCount[]> => {
+    const rows = await db
+      .select({
+        id: itemTypes.id,
+        name: itemTypes.name,
+        icon: itemTypes.icon,
+        color: itemTypes.color,
+        count: count(items.id),
+      })
+      .from(itemTypes)
+      .leftJoin(
+        items,
+        and(eq(items.typeId, itemTypes.id), eq(items.userId, userId))
+      )
+      .where(or(isNull(itemTypes.userId), eq(itemTypes.userId, userId)))
+      .groupBy(itemTypes.id)
+      .orderBy(itemTypes.name)
 
-  return rows.map((row) => ({
-    id: row.id,
-    name: row.name,
-    icon: row.icon ?? "File",
-    color: row.color ?? "#6b7280",
-    count: Number(row.count),
-  }))
-}
+    return rows.map((row) => ({
+      id: row.id,
+      name: row.name,
+      icon: row.icon ?? "File",
+      color: row.color ?? "#6b7280",
+      count: Number(row.count),
+    }))
+  }
+)

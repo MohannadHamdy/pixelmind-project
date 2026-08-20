@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { deleteAccountData } from "@/actions/account"
 
 const CONFIRM_TEXT = "delete"
 
@@ -35,6 +36,12 @@ export function DeleteAccountDialog() {
     setIsDeleting(true)
     setError(null)
     try {
+      const result = await deleteAccountData()
+      if (!result.success) {
+        setError(result.error)
+        setIsDeleting(false)
+        return
+      }
       await user.delete()
       router.push("/")
     } catch (err) {
@@ -64,8 +71,8 @@ export function DeleteAccountDialog() {
         <DialogHeader>
           <DialogTitle>Delete account</DialogTitle>
           <DialogDescription>
-            This permanently deletes your account and all items,
-            collections, and tags. This action cannot be undone.
+            This permanently deletes your account and all items, collections,
+            and tags. This action cannot be undone.
           </DialogDescription>
         </DialogHeader>
         <div className="flex flex-col gap-1.5">

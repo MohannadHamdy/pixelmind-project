@@ -4,11 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import type { ItemTypeCount } from "@/lib/db/items"
 import { iconsByName } from "@/lib/type-icons"
 
-export function TypeBreakdown({
-  typeCounts,
-}: {
-  typeCounts: ItemTypeCount[]
-}) {
+export function TypeBreakdown({ typeCounts }: { typeCounts: ItemTypeCount[] }) {
   return (
     <Card>
       <CardHeader>
