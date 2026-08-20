@@ -1,20 +1,14 @@
-# Current Feature: Add Pro Badge to Sidebar
+# Current Feature
 
 ## Status
 
-In Progress
+Completed
 
 ## Goals
 
-- Add a "PRO" badge to the "File" and "Image" item types in the sidebar
-- Use the ShadCN Badge component
-- Badge color should be clean and subtle — not the primary theme color
-- Text must read "PRO" in all uppercase
-
 ## Notes
 
-- Spec: context/features/add-pro-badge-spec.md
-- Reference: context/project-overview.md (custom types / file uploads are Pro-only features per the monetization plan)
+<!-- Any extra notes -->
 
 ## History
 
@@ -30,3 +24,4 @@ In Progress
 - Dashboard Collections: replaced mock collection cards with real data fetched from Neon via Drizzle (lib/db/collections.ts), border/gradient color and small type icons derived from each collection's most-used item type
 - Dashboard Items (context/features/dashboard-items-spec.md): replaced mock pinned/recent items and stats with real data (lib/db/items.ts); sidebar collections, types, tags, and counts now also fetched from Neon (lib/db/item-types.ts, lib/db/tags.ts, lib/db/users.ts); sidebar polish — count badges use shadcn Badge in the theme's primary color, single sidebar-toggle trigger (left-arrow icon in sidebar when open, header icon when collapsed), opaque search input background
 - Header UI changes (context/features/header-spec.md): AI ghost button, working Grid/List view switcher (synced via `view` URL search param, flows through pinned/recent item sections into ItemCard's list-row layout), custom light/dark segmented toggle (no dropdown, matches bordered pill style), New button moved to the far right — all grouped together on the right side of the top bar; fixed `grid-noise` background utility in app/globals.css to use `color-mix` with `var(--foreground)` instead of a hardcoded white line color, so the grid pattern is visible in light mode too
+- Add Pro badge to sidebar (context/features/add-pro-badge-spec.md): "File" and "Image" item types in the sidebar Types section now show a bold, uppercase "Pro" badge (ShadCN Badge, `secondary` variant) that turns primary-colored on row hover
