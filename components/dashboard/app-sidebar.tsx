@@ -176,6 +176,9 @@ export function AppSidebar({
           <SidebarMenu>
             {itemTypes.map((type) => {
               const TypeIcon = iconsByName[type.icon] ?? FileIcon
+              const isProType =
+                type.name.toLowerCase() === "file" ||
+                type.name.toLowerCase() === "image"
               return (
                 <SidebarMenuItem key={type.id}>
                   <SidebarMenuButton
@@ -184,6 +187,14 @@ export function AppSidebar({
                   >
                     <TypeIcon style={{ color: type.color }} />
                     <span className="capitalize">{type.name}</span>
+                    {isProType && (
+                      <Badge
+                        variant="secondary"
+                        className="ml-auto font-bold uppercase group-hover/menu-button:text-primary group-data-[collapsible=icon]:hidden"
+                      >
+                        Pro
+                      </Badge>
+                    )}
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               )

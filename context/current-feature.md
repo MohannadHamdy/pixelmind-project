@@ -1,14 +1,20 @@
-# Current Feature
+# Current Feature: Add Pro Badge to Sidebar
 
 ## Status
 
-Completed
+In Progress
 
 ## Goals
 
+- Add a "PRO" badge to the "File" and "Image" item types in the sidebar
+- Use the ShadCN Badge component
+- Badge color should be clean and subtle — not the primary theme color
+- Text must read "PRO" in all uppercase
+
 ## Notes
 
-<!-- Any extra notes -->
+- Spec: context/features/add-pro-badge-spec.md
+- Reference: context/project-overview.md (custom types / file uploads are Pro-only features per the monetization plan)
 
 ## History
 
