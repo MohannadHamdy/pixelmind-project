@@ -1,6 +1,6 @@
 import { ClerkProvider } from "@clerk/nextjs"
 import { shadcn } from "@clerk/ui/themes"
-import { Geist, Geist_Mono, DM_Sans, Roboto } from "next/font/google"
+import { Geist_Mono, DM_Sans, Roboto } from "next/font/google"
 
 import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
