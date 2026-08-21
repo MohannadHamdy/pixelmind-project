@@ -2,15 +2,20 @@
 
 ## Status
 
-Not Started
+Complete
 
 ## Goals
 
-<!-- Bullet points of what success looks like -->
+- Set up Vitest as the unit test runner for the project
+- Cover server actions (`actions/*.ts`) and utils (`lib/*.ts`, excluding `lib/db/*` data-fetching functions) only — no component testing
+- Mock `@clerk/nextjs/server` and `@/db` so server actions can be tested without hitting real Clerk/Postgres
+- Update `context/ai-interaction.md` workflow and `CLAUDE.md` commands to reflect the new `pnpm test` step
 
 ## Notes
 
-<!-- Additional context, constraints, or details from spec -->
+- Test runner: Vitest + `vite-tsconfig-paths` (resolves the `@/*` alias)
+- A shared test fixture holds a fake Clerk user (email `test@user.com`) used wherever a test needs to bypass Clerk auth via mocking — no real Clerk credentials are used in tests
+- Component testing is explicitly out of scope for now
 
 ## History
 
@@ -28,3 +33,4 @@ Not Started
 - Profile page (context/features/profile-spec.md): `/profile` route with usage stats (total items/collections, per-type breakdown via lib/db/items.ts `getItemCountsByType`) and a "Joined" date; account/security management (name, avatar, email, connected accounts, password) delegated to an embedded Clerk `<UserProfile>` themed with `@clerk/ui`'s shadcn theme to match app styling; custom delete-account dialog with typed confirmation, redirects to `/` after deletion; sidebar polish — brand logo links to `/dashboard`, "All items" highlight is now route-aware via `usePathname`, gear icon links to `/profile`
 - Code-scanner findings fixup: `auth.protect()` replaces soft auth checks across dashboard/profile server components; Clerk webhook DB writes wrapped in try/catch with logging; all `lib/db/*` query functions wrapped in React `cache()` to dedupe repeated per-request fetches; `getAllCollectionsWithCounts`/`getRecentCollections` rewritten to use SQL aggregation instead of pulling full item rows; `loading.tsx` skeletons added for `/dashboard` and `/profile`; account deletion now deletes the DB user row synchronously via a new server action (`actions/account.ts`) before calling Clerk's `user.delete()`; `AppSidebar` split into `components/dashboard/sidebar/*` subcomponents; `ItemCard` grid/list views share `ItemTagList`/`ItemStatusIcons`; gradient alpha magic numbers named; added `app/error.tsx` error boundary
 - Items List View (context/features/item-list-view-spec.md): new dynamic route `/items/[type]` (e.g. `/items/snippets`) showing a responsive 2-column grid (`md:`) of type-filtered `ItemCard`s, each with a left border colored by the item type (`accentBorder` prop on `ItemCard`); added `getItemsByType`/`getItemTypeBySlug` (`lib/db/items.ts`, `lib/db/item-types.ts`) and shared `typeSlug` helper (`lib/item-type-slug.ts`); sidebar "Types" links now highlight the active type via `usePathname`; grid/list `ViewToggle` moved off the global `TopBar` (where it only worked on the dashboard) onto each page's own header row (dashboard and items/[type]) so it's wired to that page's own content
+- Vitest setup: added `vitest.config.ts` (native `resolve.tsconfigPaths` for the `@/*` alias, no extra plugin) and `pnpm test` script; tests scoped to server actions and utils only (no components) — `lib/item-type-slug.test.ts`, `lib/utils.test.ts`, `actions/account.test.ts` (mocks `@clerk/nextjs/server` and `@/db`); added `test/fixtures/user.ts` with a shared fake Clerk user for bypassing auth in tests; updated `context/ai-interaction.md` (new "Unit Testing" section, workflow step 4) and `CLAUDE.md` commands

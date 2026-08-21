@@ -23,8 +23,7 @@ This project uses Next.js 16, which has breaking changes vs. older Next.js versi
 - `pnpm lint` — run ESLint (flat config, `eslint-config-next` core-web-vitals + typescript rules)
 - `pnpm typecheck` — `tsc --noEmit`
 - `pnpm format` — Prettier write across `**/*.{ts,tsx}`
-
-There is no test runner configured in this repo yet.
+- `pnpm test` — run Vitest unit tests (server actions and utils only, see `context/ai-interaction.md`)
 
 ## Adding shadcn/ui components
 
