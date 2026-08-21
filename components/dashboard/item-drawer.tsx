@@ -1,6 +1,5 @@
 "use client"
 
-import type { KeyboardEvent } from "react"
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import {
@@ -38,6 +37,15 @@ import {
 } from "@/components/ui/alert-dialog"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import {
@@ -48,14 +56,16 @@ import {
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Textarea } from "@/components/ui/textarea"
+import { TagInput } from "@/components/dashboard/tag-input"
 import type { ItemDetail } from "@/lib/db/items"
+import {
+  CONTENT_FIELD_TYPES,
+  LANGUAGE_FIELD_TYPES,
+  URL_FIELD_TYPES,
+} from "@/lib/item-field-types"
 import { getTagColorClass } from "@/lib/tag-colors"
 import { iconsByName } from "@/lib/type-icons"
 import { cn, formatRelativeTime } from "@/lib/utils"
-
-const CONTENT_FIELD_TYPES = ["snippet", "prompt", "command", "note"]
-const LANGUAGE_FIELD_TYPES = ["snippet", "command"]
-const URL_FIELD_TYPES = ["link"]
 
 interface EditForm {
   title: string
@@ -129,9 +139,10 @@ export function ItemDrawer({
   const [result, setResult] = useState<DrawerResult | null>(null)
   const [mode, setMode] = useState<"view" | "edit">("view")
   const [form, setForm] = useState<EditForm | null>(null)
-  const [tagDraft, setTagDraft] = useState("")
   const [saving, setSaving] = useState(false)
   const [showUnsavedAlert, setShowUnsavedAlert] = useState(false)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [deleting, setDeleting] = useState(false)
   const [languageOptions, setLanguageOptions] = useState<string[]>([])
   const { defaultLayout, onLayoutChanged } = useDefaultLayout({
     id: LAYOUT_ID,
@@ -161,7 +172,6 @@ export function ItemDrawer({
     setPrevItemId(itemId)
     setMode("view")
     setForm(null)
-    setTagDraft("")
   }
 
   const item = result?.itemId === itemId ? result.item : undefined
@@ -192,52 +202,13 @@ export function ItemDrawer({
   function handleCancelEdit() {
     setMode("view")
     setForm(null)
-    setTagDraft("")
   }
 
   function handleDiscardChanges() {
     setShowUnsavedAlert(false)
     setMode("view")
     setForm(null)
-    setTagDraft("")
     onOpenChange(false)
-  }
-
-  function addTag(name: string) {
-    const trimmed = name.trim()
-    if (!trimmed) return
-    setForm((current) =>
-      current && !current.tags.includes(trimmed)
-        ? { ...current, tags: [...current.tags, trimmed] }
-        : current
-    )
-  }
-
-  function removeTag(name: string) {
-    setForm(
-      (current) =>
-        current && { ...current, tags: current.tags.filter((t) => t !== name) }
-    )
-  }
-
-  function handleTagDraftChange(value: string) {
-    if (value.includes(",")) {
-      const [newTag, ...rest] = value.split(",")
-      addTag(newTag)
-      setTagDraft(rest.join(","))
-    } else {
-      setTagDraft(value)
-    }
-  }
-
-  function handleTagDraftKeyDown(e: KeyboardEvent<HTMLInputElement>) {
-    if (e.key === "Enter") {
-      e.preventDefault()
-      addTag(tagDraft)
-      setTagDraft("")
-    } else if (e.key === "Backspace" && !tagDraft && form && form.tags.length) {
-      removeTag(form.tags[form.tags.length - 1])
-    }
   }
 
   async function handleSave() {
@@ -257,7 +228,6 @@ export function ItemDrawer({
       setResult({ itemId: item.id, status: "loaded", item: response.data })
       setMode("view")
       setForm(null)
-      setTagDraft("")
       toast.success("Item updated")
       router.refresh()
     } else {
@@ -303,13 +273,18 @@ export function ItemDrawer({
     if (text) await navigator.clipboard.writeText(text)
   }
 
-  async function handleDelete() {
+  async function confirmDelete() {
     if (!item) return
-    if (!window.confirm(`Delete "${item.title}"? This can't be undone.`)) return
+    setDeleting(true)
     const response = await deleteItem(item.id)
+    setDeleting(false)
     if (response.success) {
+      setShowDeleteConfirm(false)
       onOpenChange(false)
+      toast.success("Item deleted")
       router.refresh()
+    } else {
+      toast.error(response.error)
     }
   }
 
@@ -454,7 +429,7 @@ export function ItemDrawer({
                         <Button
                           variant="destructive"
                           size="sm"
-                          onClick={handleDelete}
+                          onClick={() => setShowDeleteConfirm(true)}
                         >
                           <TrashIcon /> Delete
                         </Button>
@@ -528,35 +503,11 @@ export function ItemDrawer({
 
                       <div className="flex flex-col gap-1.5">
                         <Label htmlFor="edit-tags">Tags</Label>
-                        <div className="flex flex-wrap items-center gap-1.5 rounded-2xl border border-transparent bg-input/50 p-2 focus-within:border-ring focus-within:ring-3 focus-within:ring-ring/30">
-                          {form.tags.map((tag) => (
-                            <Badge
-                              key={tag}
-                              variant="secondary"
-                              className={cn("gap-1", getTagColorClass(tag))}
-                            >
-                              #{tag}
-                              <button
-                                type="button"
-                                onClick={() => removeTag(tag)}
-                                className="opacity-70 hover:opacity-100"
-                              >
-                                <XIcon className="size-3" />
-                                <span className="sr-only">Remove {tag}</span>
-                              </button>
-                            </Badge>
-                          ))}
-                          <input
-                            id="edit-tags"
-                            value={tagDraft}
-                            onChange={(e) =>
-                              handleTagDraftChange(e.target.value)
-                            }
-                            onKeyDown={handleTagDraftKeyDown}
-                            placeholder="Add a tag, then press comma"
-                            className="min-w-24 flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
-                          />
-                        </div>
+                        <TagInput
+                          id="edit-tags"
+                          tags={form.tags}
+                          onChange={(tags) => setForm({ ...form, tags })}
+                        />
                       </div>
 
                       <div className="flex flex-col gap-2 border-t border-border pt-4 text-xs text-muted-foreground">
@@ -642,6 +593,29 @@ export function ItemDrawer({
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete item</DialogTitle>
+            <DialogDescription>
+              Delete &quot;{item?.title}&quot;? This can&apos;t be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <DialogClose render={<Button type="button" variant="outline" />}>
+              Cancel
+            </DialogClose>
+            <Button
+              variant="destructive"
+              onClick={confirmDelete}
+              disabled={deleting}
+            >
+              {deleting ? "Deleting..." : "Delete"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   )
 }

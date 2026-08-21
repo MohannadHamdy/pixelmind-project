@@ -8,6 +8,7 @@
 - Don't add features not in the project spec
 - Never delete files without clarification
 - always layout a TODO list and go through it so I know what is being worked on and what's next instead of guessing
+- For browser verification: check if PlayWright MCP is installed or not, if not, SKIP BROWSER VERIFICATION.
 
 ## Workflow
 

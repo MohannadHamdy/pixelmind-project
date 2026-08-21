@@ -3,6 +3,7 @@ import { or, eq, isNull } from "drizzle-orm"
 
 import { db } from "@/db"
 import { itemTypes } from "@/db/schema"
+import { CREATABLE_TYPE_NAMES } from "@/lib/item-field-types"
 import { typeSlug } from "@/lib/item-type-slug"
 
 export interface ItemTypeSummary {
@@ -25,6 +26,15 @@ export const getItemTypesForUser = cache(
       icon: type.icon ?? "File",
       color: type.color ?? "#6b7280",
     }))
+  }
+)
+
+export const getCreatableItemTypes = cache(
+  async (userId: string): Promise<ItemTypeSummary[]> => {
+    const types = await getItemTypesForUser(userId)
+    return CREATABLE_TYPE_NAMES.map((name) =>
+      types.find((type) => type.name.toLowerCase() === name)
+    ).filter((type): type is ItemTypeSummary => Boolean(type))
   }
 )
 

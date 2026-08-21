@@ -11,6 +11,7 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar"
 import { Button } from "@/components/ui/button"
+import { useCreateItemDialog } from "@/components/dashboard/create-item-dialog-provider"
 import { SidebarQuickLinks } from "@/components/dashboard/sidebar/sidebar-quick-links"
 import { SidebarCollections } from "@/components/dashboard/sidebar/sidebar-collections"
 import { SidebarTypes } from "@/components/dashboard/sidebar/sidebar-types"
@@ -36,6 +37,7 @@ export function AppSidebar({
   tags: string[]
 }) {
   const pathname = usePathname()
+  const { openCreateDialog } = useCreateItemDialog()
 
   return (
     <Sidebar collapsible="icon">
@@ -61,7 +63,10 @@ export function AppSidebar({
             className="group-data-[collapsible=icon]:hidden"
           />
         </div>
-        <Button className="w-full group-data-[collapsible=icon]:size-8 group-data-[collapsible=icon]:p-0">
+        <Button
+          className="w-full group-data-[collapsible=icon]:size-8 group-data-[collapsible=icon]:p-0"
+          onClick={openCreateDialog}
+        >
           <PlusIcon />
           <span className="group-data-[collapsible=icon]:hidden">New item</span>
         </Button>

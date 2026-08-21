@@ -7,6 +7,11 @@ import { z } from "zod"
 import { db } from "@/db"
 import { items } from "@/db/schema"
 import {
+  getCreatableItemTypes,
+  type ItemTypeSummary,
+} from "@/lib/db/item-types"
+import {
+  createItem as createItemQuery,
   getDistinctLanguages,
   getItemById,
   updateItem as updateItemQuery,
@@ -106,6 +111,59 @@ export async function updateItem(
     return { success: true, data: updated }
   } catch (error) {
     return { success: false, error: toError(error, "Failed to update item") }
+  }
+}
+
+export async function getCreatableItemTypeOptions(): Promise<
+  ActionResult<ItemTypeSummary[]>
+> {
+  try {
+    const { userId } = await auth.protect()
+    const types = await getCreatableItemTypes(userId)
+    return { success: true, data: types }
+  } catch (error) {
+    return {
+      success: false,
+      error: toError(error, "Failed to load item types"),
+    }
+  }
+}
+
+const createItemSchema = z.object({
+  typeId: z.string().trim().min(1, "Type is required"),
+  title: z.string().trim().min(1, "Title is required"),
+  description: z.string().nullable().optional(),
+  content: z.string().nullable().optional(),
+  url: z.url().nullable().optional(),
+  language: z.string().nullable().optional(),
+  tags: z.array(z.string().trim().min(1)),
+})
+
+export type CreateItemData = z.infer<typeof createItemSchema>
+
+export async function createItem(
+  data: CreateItemData
+): Promise<ActionResult<ItemDetail>> {
+  try {
+    const parsed = createItemSchema.safeParse(data)
+    if (!parsed.success) {
+      return { success: false, error: parsed.error.issues[0].message }
+    }
+
+    const { userId } = await auth.protect()
+    const created = await createItemQuery(userId, {
+      typeId: parsed.data.typeId,
+      title: parsed.data.title,
+      description: parsed.data.description ?? null,
+      content: parsed.data.content ?? null,
+      url: parsed.data.url ?? null,
+      language: parsed.data.language ?? null,
+      tags: parsed.data.tags,
+    })
+
+    return { success: true, data: created }
+  } catch (error) {
+    return { success: false, error: toError(error, "Failed to create item") }
   }
 }
 

@@ -6,6 +6,7 @@ import {
   SparkleIcon,
 } from "@phosphor-icons/react/dist/ssr"
 
+import { useCreateItemDialog } from "@/components/dashboard/create-item-dialog-provider"
 import { ThemeToggle } from "@/components/dashboard/theme-toggle"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -14,6 +15,7 @@ import { SidebarTrigger, useSidebar } from "@/components/ui/sidebar"
 export function TopBar() {
   const { state, isMobile } = useSidebar()
   const showTrigger = isMobile || state === "collapsed"
+  const { openCreateDialog } = useCreateItemDialog()
 
   return (
     <header className="flex h-18 shrink-0 items-center gap-4 border-b border-border px-6">
@@ -32,7 +34,7 @@ export function TopBar() {
           AI
         </Button>
         <ThemeToggle />
-        <Button data-icon="inline-start">
+        <Button data-icon="inline-start" onClick={openCreateDialog}>
           <PlusIcon />
           New
         </Button>

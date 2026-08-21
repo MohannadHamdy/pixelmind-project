@@ -129,6 +129,28 @@ export const getItemById = cache(
   }
 )
 
+async function resolveTagIds(
+  userId: string,
+  names: string[]
+): Promise<string[]> {
+  const tagIds: string[] = []
+  for (const name of names) {
+    const existing = await db.query.tags.findFirst({
+      where: and(eq(tags.userId, userId), eq(tags.name, name)),
+    })
+    if (existing) {
+      tagIds.push(existing.id)
+    } else {
+      const [created] = await db
+        .insert(tags)
+        .values({ name, userId })
+        .returning({ id: tags.id })
+      tagIds.push(created.id)
+    }
+  }
+  return tagIds
+}
+
 export interface UpdateItemInput {
   title: string
   description: string | null
@@ -159,22 +181,7 @@ export async function updateItem(
 
   await db.delete(itemTags).where(eq(itemTags.itemId, id))
 
-  const tagIds: string[] = []
-  for (const name of data.tags) {
-    const existing = await db.query.tags.findFirst({
-      where: and(eq(tags.userId, userId), eq(tags.name, name)),
-    })
-    if (existing) {
-      tagIds.push(existing.id)
-    } else {
-      const [created] = await db
-        .insert(tags)
-        .values({ name, userId })
-        .returning({ id: tags.id })
-      tagIds.push(created.id)
-    }
-  }
-
+  const tagIds = await resolveTagIds(userId, data.tags)
   if (tagIds.length > 0) {
     await db
       .insert(itemTags)
@@ -182,6 +189,46 @@ export async function updateItem(
   }
 
   return getItemById(userId, id)
+}
+
+export interface CreateItemInput {
+  typeId: string
+  title: string
+  description: string | null
+  content: string | null
+  url: string | null
+  language: string | null
+  tags: string[]
+}
+
+export async function createItem(
+  userId: string,
+  data: CreateItemInput
+): Promise<ItemDetail> {
+  const [item] = await db
+    .insert(items)
+    .values({
+      userId,
+      typeId: data.typeId,
+      contentType: "text",
+      title: data.title,
+      description: data.description,
+      content: data.content,
+      url: data.url,
+      language: data.language,
+    })
+    .returning({ id: items.id })
+
+  const tagIds = await resolveTagIds(userId, data.tags)
+  if (tagIds.length > 0) {
+    await db
+      .insert(itemTags)
+      .values(tagIds.map((tagId) => ({ itemId: item.id, tagId })))
+  }
+
+  const created = await getItemById(userId, item.id)
+  if (!created) throw new Error("Failed to load created item")
+  return created
 }
 
 export const getDistinctLanguages = cache(
