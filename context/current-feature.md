@@ -2,20 +2,15 @@
 
 ## Status
 
-Complete
+Not Started
 
 ## Goals
 
-- Set up Vitest as the unit test runner for the project
-- Cover server actions (`actions/*.ts`) and utils (`lib/*.ts`, excluding `lib/db/*` data-fetching functions) only — no component testing
-- Mock `@clerk/nextjs/server` and `@/db` so server actions can be tested without hitting real Clerk/Postgres
-- Update `context/ai-interaction.md` workflow and `CLAUDE.md` commands to reflect the new `pnpm test` step
+<!-- Bullet points of what success looks like -->
 
 ## Notes
 
-- Test runner: Vitest + `vite-tsconfig-paths` (resolves the `@/*` alias)
-- A shared test fixture holds a fake Clerk user (email `test@user.com`) used wherever a test needs to bypass Clerk auth via mocking — no real Clerk credentials are used in tests
-- Component testing is explicitly out of scope for now
+<!-- Additional context, constraints, or details from spec -->
 
 ## History
 
