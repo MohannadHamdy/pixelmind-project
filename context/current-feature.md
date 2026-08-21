@@ -1,16 +1,29 @@
-# Current Feature
+# Item Create & Delete
 
 ## Status
 
-Not Started
+In Progress
 
 ## Goals
 
-<!-- Bullet points of what success looks like -->
+- Add new items via a modal dialog opened from "New Item" button in top bar
+- Delete items with a confirmation dialog
 
 ## Notes
 
-<!-- Additional context, constraints, or details from spec -->
+- Use shadcn Dialog component for both create and delete
+- Type selector: snippet, prompt, command, note, link
+- Fields shown based on selected type:
+  - All types: title (required), description, tags
+  - snippet/command: content, language
+  - prompt/note: content
+  - link: URL (required)
+- Server action `createItem` with Zod validation
+- Query function `createItem` in `lib/db/items.ts`
+- Toast on success, close modal and refresh
+- Delete item confirmation with shadcn Dialog component
+
+Full spec: context/features/item-create-delete-spec.md
 
 ## History
 
