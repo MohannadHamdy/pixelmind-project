@@ -1,29 +1,16 @@
-# Item Create & Delete
+# Current Feature
 
 ## Status
 
-In Progress
+Not Started
 
 ## Goals
 
-- Add new items via a modal dialog opened from "New Item" button in top bar
-- Delete items with a confirmation dialog
+<!-- Bullet points of what success looks like -->
 
 ## Notes
 
-- Use shadcn Dialog component for both create and delete
-- Type selector: snippet, prompt, command, note, link
-- Fields shown based on selected type:
-  - All types: title (required), description, tags
-  - snippet/command: content, language
-  - prompt/note: content
-  - link: URL (required)
-- Server action `createItem` with Zod validation
-- Query function `createItem` in `lib/db/items.ts`
-- Toast on success, close modal and refresh
-- Delete item confirmation with shadcn Dialog component
-
-Full spec: context/features/item-create-delete-spec.md
+<!-- Additional context, constraints, or details from spec -->
 
 ## History
 
@@ -44,3 +31,4 @@ Full spec: context/features/item-create-delete-spec.md
 - Vitest setup: added `vitest.config.ts` (native `resolve.tsconfigPaths` for the `@/*` alias, no extra plugin) and `pnpm test` script; tests scoped to server actions and utils only (no components) — `lib/item-type-slug.test.ts`, `lib/utils.test.ts`, `actions/account.test.ts` (mocks `@clerk/nextjs/server` and `@/db`); added `test/fixtures/user.ts` with a shared fake Clerk user for bypassing auth in tests; updated `context/ai-interaction.md` (new "Unit Testing" section, workflow step 4) and `CLAUDE.md` commands
 - Item Drawer (context/features/item-drawer-spec.md): right-side shadcn `Sheet` opens on `ItemCard` click on both dashboard and `/items/[type]`, replacing the old (non-existent) item detail page; full item detail fetched via server action (`actions/items.ts` `getItemDetail`, backed by `lib/db/items.ts` `getItemById`) with a loading skeleton; action bar (Copy/Edit-placeholder/Favorite/Pin/Delete) wired to `setItemFavorite`/`setItemPinned`/`deleteItem` server actions with optimistic local state + `router.refresh()`; `ItemDrawerProvider` client context (`components/dashboard/item-drawer-provider.tsx`) mounted in the dashboard layout holds open/selected-item state since pages rendering `ItemCard` are server components; drawer width is resizable and persisted per-viewer via shadcn's `resizable` (`react-resizable-panels`, `components/ui/resizable.tsx`) rather than a hand-rolled drag handler, after discovering Base UI's `Dialog.Popup` silently drops the `style` prop (root cause of two earlier failed resize attempts)
 - Item Drawer Edit Mode (context/features/item-drawer-edit-spec.md): Edit button swaps the drawer's action bar for Save/Cancel and turns the display fields into inline inputs (Title/Description/Tags for all types; type-conditional Content/Language/URL); `updateItem` server action (`actions/items.ts`, Zod-validated) + `lib/db/items.ts` query function (tag reconciliation: delete all `itemTags`, find-or-create each tag) — written as sequential queries rather than `db.transaction()` since the `neon-http` driver doesn't support transactions; comma-to-pill tag input with deterministic per-tag colors (`lib/tag-colors.ts`, also applied to `ItemCard` everywhere); unsaved-changes guard via a shadcn `AlertDialog` (added `alert-dialog`, `popover`, `command`, `input-group`, `textarea` components) with explicit "Keep editing"/"Discard changes" actions, replacing an earlier `window.alert`/`confirm`; Language field is a `Popover`+`Command` combobox (`components/dashboard/language-combobox.tsx`) that autocompletes from `getDistinctLanguages` or creates a new value; sonner `Toaster` added to the root layout (mounted in `app/layout.tsx`) for save success/error toasts, with colored icons (emerald success, destructive error)
+- Item Create & Delete (context/features/item-create-delete-spec.md): "New" buttons in the top bar and sidebar both open a shared `CreateItemDialog` (shadcn Dialog) via a new `CreateItemDialogProvider` context (mounted in the dashboard layout, mirroring `ItemDrawerProvider`) — type selector (snippet/prompt/command/note/link, added shadcn `select` component) with type-conditional fields (content, language via `LanguageCombobox`, URL) and tag input, auto-defaulting the type from the current `/items/[type]` route when opened from there; `createItem` server action (Zod-validated) + `lib/db/items.ts`/`lib/db/item-types.ts` query functions (`getCreatableItemTypes` filters to the five non-Pro types); item drawer's delete flow now confirms via a shadcn `Dialog` instead of `window.confirm`, with a success toast on delete; extracted shared `TagInput` component and `lib/item-field-types.ts` constants (`CONTENT_FIELD_TYPES`/`LANGUAGE_FIELD_TYPES`/`URL_FIELD_TYPES`/`CREATABLE_TYPE_NAMES`) so the create dialog and drawer edit form share logic instead of duplicating it
