@@ -39,9 +39,7 @@ describe("formatRelativeTime", () => {
   })
 
   it("formats days", () => {
-    const date = new Date(
-      now.getTime() - 2 * 24 * 60 * 60 * 1000
-    ).toISOString()
+    const date = new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000).toISOString()
     expect(formatRelativeTime(date)).toBe("2d ago")
   })
 

@@ -1,6 +1,7 @@
 import { auth } from "@clerk/nextjs/server"
 
 import { AppSidebar } from "@/components/dashboard/app-sidebar"
+import { ItemDrawerProvider } from "@/components/dashboard/item-drawer-provider"
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
 import { getAllCollectionsWithCounts } from "@/lib/db/collections"
 import { getItemTypesForUser } from "@/lib/db/item-types"
@@ -25,15 +26,17 @@ export default async function DashboardLayout({
 
   return (
     <SidebarProvider>
-      <AppSidebar
-        isPro={isPro}
-        itemCount={stats.totalItems}
-        favoriteCount={stats.favoriteItems}
-        collections={collections}
-        itemTypes={itemTypes}
-        tags={tags}
-      />
-      <SidebarInset className="bg-transparent">{children}</SidebarInset>
+      <ItemDrawerProvider>
+        <AppSidebar
+          isPro={isPro}
+          itemCount={stats.totalItems}
+          favoriteCount={stats.favoriteItems}
+          collections={collections}
+          itemTypes={itemTypes}
+          tags={tags}
+        />
+        <SidebarInset className="bg-transparent">{children}</SidebarInset>
+      </ItemDrawerProvider>
     </SidebarProvider>
   )
 }

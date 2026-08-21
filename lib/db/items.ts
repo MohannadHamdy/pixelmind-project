@@ -86,6 +86,49 @@ export const getItemsByType = cache((userId: string, typeId: string) =>
   findItems(userId, { typeId })
 )
 
+export interface ItemDetail extends ItemWithRelations {
+  description: string | null
+  fileSize: number | null
+}
+
+export const getItemById = cache(
+  async (userId: string, id: string): Promise<ItemDetail | null> => {
+    const item = await db.query.items.findFirst({
+      where: and(eq(items.id, id), eq(items.userId, userId)),
+      with: {
+        type: true,
+        collection: true,
+        tags: { with: { tag: true } },
+      },
+    })
+    if (!item) return null
+
+    return {
+      id: item.id,
+      title: item.title,
+      contentType: item.contentType,
+      content: item.content,
+      fileUrl: item.fileUrl,
+      fileName: item.fileName,
+      fileSize: item.fileSize,
+      url: item.url,
+      description: item.description,
+      isFavorite: item.isFavorite,
+      isPinned: item.isPinned,
+      language: item.language,
+      updatedAt: item.updatedAt,
+      type: {
+        id: item.type.id,
+        name: item.type.name,
+        icon: item.type.icon ?? "File",
+        color: item.type.color ?? "#6b7280",
+      },
+      collectionName: item.collection?.name ?? null,
+      tags: item.tags.map((itemTag) => itemTag.tag.name),
+    }
+  }
+)
+
 export interface ItemStats {
   totalItems: number
   favoriteItems: number

@@ -59,12 +59,7 @@ export default async function ItemsByTypePage({
               }
             >
               {items.map((item) => (
-                <ItemCard
-                  key={item.id}
-                  item={item}
-                  view={view}
-                  accentBorder
-                />
+                <ItemCard key={item.id} item={item} view={view} accentBorder />
               ))}
             </div>
           )}

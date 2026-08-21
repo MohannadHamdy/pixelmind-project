@@ -1,5 +1,8 @@
+"use client"
+
 import { FileIcon, PushPinIcon, StarIcon } from "@phosphor-icons/react/dist/ssr"
 
+import { useItemDrawer } from "@/components/dashboard/item-drawer-provider"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import type { ItemWithRelations } from "@/lib/db/items"
@@ -50,6 +53,7 @@ export function ItemCard({
   view?: "grid" | "list"
   accentBorder?: boolean
 }) {
+  const { openItem } = useItemDrawer()
   const TypeIcon = iconsByName[item.type.icon] ?? FileIcon
   const accentStyle = accentBorder
     ? { borderLeft: `4px solid ${item.type.color}` }
@@ -60,6 +64,7 @@ export function ItemCard({
       <Card
         size="sm"
         style={accentStyle}
+        onClick={() => openItem(item.id)}
         className="cursor-pointer flex-row items-center gap-3 rounded-2xl px-4 py-3 transition-all duration-200 hover:-translate-y-0.5 hover:ring-2 hover:ring-foreground/10"
       >
         <TypeIcon
@@ -93,6 +98,7 @@ export function ItemCard({
     <Card
       size="sm"
       style={accentStyle}
+      onClick={() => openItem(item.id)}
       className="cursor-pointer rounded-2xl transition-all duration-200 hover:-translate-y-0.5 hover:ring-2 hover:ring-foreground/10"
     >
       <CardHeader className="flex-row items-start justify-between gap-2 space-y-0">
