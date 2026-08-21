@@ -1,16 +1,31 @@
-# Current Feature
+# Current Feature: Item Drawer — Edit Mode
 
 ## Status
 
-Not Started
+In Progress
 
 ## Goals
 
-<!-- Bullet points of what success looks like -->
+- Edit button (pencil icon) in the drawer's action bar toggles the drawer into inline edit mode (same drawer, no navigation)
+- In edit mode, action bar is replaced with Save and Cancel buttons
+- Cancel discards changes and returns to view mode
+- Save persists changes via server action, returns to view mode, refreshes drawer data, and shows a success/error toast
+- Clicking away while in edit mode with unsaved changes is prevented and shows an "unsaved changes" alert
+- Tags input: typing a tag then hitting comma converts it to a pill immediately
+- Editable fields (all types): Title (required text input), Description (optional textarea), Tags (comma-separated input → tag array on save)
+- Editable fields (type-specific, shown only for relevant type): Content (textarea) for snippet/prompt/command/note; Language (text input) for snippet/command; URL (text input) for link
+- Non-editable in edit mode (display only): item type, collections, created/updated dates
+- `updateItem(itemId, data)` server action in `src/actions/items.ts` — Zod-validated, `{ success, data, error }` pattern, auth via `auth()`, ownership check, returns updated `ItemDetail`
+- `updateItem` query function in `lib/db/items.ts` — tag handling: disconnect all existing tags, connect-or-create new ones
 
 ## Notes
 
-<!-- Additional context, constraints, or details from spec -->
+- Spec: context/features/item-drawer-edit-spec.md
+- Zod schema for update payload: title (non-empty trimmed string), description (string|null, optional), content (string|null, optional), url (valid URL string|null, optional), language (string|null, optional), tags (array of trimmed non-empty strings); return Zod errors in `{ success: false, error }`
+- Keep it simple — no form library, controlled inputs + local state
+- Client-side: disable Save when title is empty (basic UX guard); server-side Zod is source of truth
+- Content textarea is plain (not a code editor) — that comes later
+- After save, call `router.refresh()` so the underlying card list reflects changes
 
 ## History
 

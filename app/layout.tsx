@@ -4,6 +4,7 @@ import { Geist_Mono, DM_Sans, Roboto } from "next/font/google"
 
 import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
+import { Toaster } from "@/components/ui/sonner"
 import { cn } from "@/lib/utils"
 
 const robotoHeading = Roboto({ subsets: ["latin"], variable: "--font-heading" })
@@ -34,7 +35,10 @@ export default function RootLayout({
     >
       <body className="grid-noise">
         <ClerkProvider appearance={{ theme: shadcn }}>
-          <ThemeProvider>{children}</ThemeProvider>
+          <ThemeProvider>
+            {children}
+            <Toaster />
+          </ThemeProvider>
         </ClerkProvider>
       </body>
     </html>

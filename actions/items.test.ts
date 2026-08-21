@@ -4,6 +4,8 @@ import { testUser } from "@/test/fixtures/user"
 
 const authProtect = vi.fn()
 const getItemById = vi.fn()
+const updateItem = vi.fn()
+const getDistinctLanguages = vi.fn()
 const dbReturning = vi.fn()
 const dbWhere = vi.fn(() => ({ returning: dbReturning }))
 const dbSet = vi.fn(() => ({ where: dbWhere }))
@@ -20,6 +22,8 @@ vi.mock("@/db", () => ({
 
 vi.mock("@/lib/db/items", () => ({
   getItemById,
+  updateItem,
+  getDistinctLanguages,
 }))
 
 const item = {
@@ -101,6 +105,106 @@ describe("setItemFavorite", () => {
     const result = await setItemFavorite(item.id, true)
 
     expect(result).toEqual({ success: false, error: "Item not found" })
+  })
+})
+
+describe("updateItem", () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
+  const validData = {
+    title: "Updated title",
+    description: "Updated description",
+    content: "console.log('updated')",
+    url: null,
+    language: "typescript",
+    tags: ["react", "hooks"],
+  }
+
+  it("updates an owned item with valid data", async () => {
+    authProtect.mockResolvedValue({ userId: testUser.id })
+    updateItem.mockResolvedValue({ ...item, ...validData })
+
+    const { updateItem: updateItemAction } = await import("@/actions/items")
+    const result = await updateItemAction(item.id, validData)
+
+    expect(result).toEqual({
+      success: true,
+      data: { ...item, ...validData },
+    })
+    expect(updateItem).toHaveBeenCalledWith(testUser.id, item.id, validData)
+  })
+
+  it("rejects an empty title before hitting auth or the database", async () => {
+    const { updateItem: updateItemAction } = await import("@/actions/items")
+    const result = await updateItemAction(item.id, {
+      ...validData,
+      title: "   ",
+    })
+
+    expect(result).toEqual({ success: false, error: "Title is required" })
+    expect(authProtect).not.toHaveBeenCalled()
+    expect(updateItem).not.toHaveBeenCalled()
+  })
+
+  it("rejects an invalid url", async () => {
+    const { updateItem: updateItemAction } = await import("@/actions/items")
+    const result = await updateItemAction(item.id, {
+      ...validData,
+      url: "not-a-url",
+    })
+
+    expect(result.success).toBe(false)
+    expect(updateItem).not.toHaveBeenCalled()
+  })
+
+  it("returns a failure result when the item isn't found or owned", async () => {
+    authProtect.mockResolvedValue({ userId: testUser.id })
+    updateItem.mockResolvedValue(null)
+
+    const { updateItem: updateItemAction } = await import("@/actions/items")
+    const result = await updateItemAction(item.id, validData)
+
+    expect(result).toEqual({ success: false, error: "Item not found" })
+  })
+
+  it("returns a failure result when the user is not authenticated", async () => {
+    authProtect.mockRejectedValue(new Error("Unauthorized"))
+
+    const { updateItem: updateItemAction } = await import("@/actions/items")
+    const result = await updateItemAction(item.id, validData)
+
+    expect(result).toEqual({ success: false, error: "Unauthorized" })
+  })
+})
+
+describe("getLanguageOptions", () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
+  it("returns the distinct languages for the authenticated user", async () => {
+    authProtect.mockResolvedValue({ userId: testUser.id })
+    getDistinctLanguages.mockResolvedValue(["typescript", "python"])
+
+    const { getLanguageOptions } = await import("@/actions/items")
+    const result = await getLanguageOptions()
+
+    expect(result).toEqual({
+      success: true,
+      data: ["typescript", "python"],
+    })
+    expect(getDistinctLanguages).toHaveBeenCalledWith(testUser.id)
+  })
+
+  it("returns a failure result when the user is not authenticated", async () => {
+    authProtect.mockRejectedValue(new Error("Unauthorized"))
+
+    const { getLanguageOptions } = await import("@/actions/items")
+    const result = await getLanguageOptions()
+
+    expect(result).toEqual({ success: false, error: "Unauthorized" })
   })
 })
 

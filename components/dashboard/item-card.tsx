@@ -6,6 +6,7 @@ import { useItemDrawer } from "@/components/dashboard/item-drawer-provider"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import type { ItemWithRelations } from "@/lib/db/items"
+import { getTagColorClass } from "@/lib/tag-colors"
 import { iconsByName } from "@/lib/type-icons"
 import { formatRelativeTime } from "@/lib/utils"
 
@@ -19,7 +20,7 @@ function ItemTagList({ tags }: { tags: string[] }) {
   return (
     <>
       {tags.map((tag) => (
-        <Badge key={tag} variant="secondary">
+        <Badge key={tag} variant="secondary" className={getTagColorClass(tag)}>
           #{tag}
         </Badge>
       ))}

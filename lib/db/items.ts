@@ -1,8 +1,8 @@
 import { cache } from "react"
-import { and, count, desc, eq, or, isNull, sql } from "drizzle-orm"
+import { and, count, desc, eq, isNotNull, isNull, or, sql } from "drizzle-orm"
 
 import { db } from "@/db"
-import { collections, items, itemTypes } from "@/db/schema"
+import { collections, itemTags, items, itemTypes, tags } from "@/db/schema"
 
 export interface ItemTypeSummary {
   id: string
@@ -126,6 +126,73 @@ export const getItemById = cache(
       collectionName: item.collection?.name ?? null,
       tags: item.tags.map((itemTag) => itemTag.tag.name),
     }
+  }
+)
+
+export interface UpdateItemInput {
+  title: string
+  description: string | null
+  content: string | null
+  url: string | null
+  language: string | null
+  tags: string[]
+}
+
+export async function updateItem(
+  userId: string,
+  id: string,
+  data: UpdateItemInput
+): Promise<ItemDetail | null> {
+  const [item] = await db
+    .update(items)
+    .set({
+      title: data.title,
+      description: data.description,
+      content: data.content,
+      url: data.url,
+      language: data.language,
+    })
+    .where(and(eq(items.id, id), eq(items.userId, userId)))
+    .returning({ id: items.id })
+
+  if (!item) return null
+
+  await db.delete(itemTags).where(eq(itemTags.itemId, id))
+
+  const tagIds: string[] = []
+  for (const name of data.tags) {
+    const existing = await db.query.tags.findFirst({
+      where: and(eq(tags.userId, userId), eq(tags.name, name)),
+    })
+    if (existing) {
+      tagIds.push(existing.id)
+    } else {
+      const [created] = await db
+        .insert(tags)
+        .values({ name, userId })
+        .returning({ id: tags.id })
+      tagIds.push(created.id)
+    }
+  }
+
+  if (tagIds.length > 0) {
+    await db
+      .insert(itemTags)
+      .values(tagIds.map((tagId) => ({ itemId: id, tagId })))
+  }
+
+  return getItemById(userId, id)
+}
+
+export const getDistinctLanguages = cache(
+  async (userId: string): Promise<string[]> => {
+    const rows = await db
+      .selectDistinct({ language: items.language })
+      .from(items)
+      .where(and(eq(items.userId, userId), isNotNull(items.language)))
+      .orderBy(items.language)
+
+    return rows.map((row) => row.language!).filter(Boolean)
   }
 )
 
