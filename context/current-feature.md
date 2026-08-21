@@ -1,31 +1,16 @@
-# Current Feature: Item Drawer — Edit Mode
+# Current Feature
 
 ## Status
 
-In Progress
+Not Started
 
 ## Goals
 
-- Edit button (pencil icon) in the drawer's action bar toggles the drawer into inline edit mode (same drawer, no navigation)
-- In edit mode, action bar is replaced with Save and Cancel buttons
-- Cancel discards changes and returns to view mode
-- Save persists changes via server action, returns to view mode, refreshes drawer data, and shows a success/error toast
-- Clicking away while in edit mode with unsaved changes is prevented and shows an "unsaved changes" alert
-- Tags input: typing a tag then hitting comma converts it to a pill immediately
-- Editable fields (all types): Title (required text input), Description (optional textarea), Tags (comma-separated input → tag array on save)
-- Editable fields (type-specific, shown only for relevant type): Content (textarea) for snippet/prompt/command/note; Language (text input) for snippet/command; URL (text input) for link
-- Non-editable in edit mode (display only): item type, collections, created/updated dates
-- `updateItem(itemId, data)` server action in `src/actions/items.ts` — Zod-validated, `{ success, data, error }` pattern, auth via `auth()`, ownership check, returns updated `ItemDetail`
-- `updateItem` query function in `lib/db/items.ts` — tag handling: disconnect all existing tags, connect-or-create new ones
+<!-- Bullet points of what success looks like -->
 
 ## Notes
 
-- Spec: context/features/item-drawer-edit-spec.md
-- Zod schema for update payload: title (non-empty trimmed string), description (string|null, optional), content (string|null, optional), url (valid URL string|null, optional), language (string|null, optional), tags (array of trimmed non-empty strings); return Zod errors in `{ success: false, error }`
-- Keep it simple — no form library, controlled inputs + local state
-- Client-side: disable Save when title is empty (basic UX guard); server-side Zod is source of truth
-- Content textarea is plain (not a code editor) — that comes later
-- After save, call `router.refresh()` so the underlying card list reflects changes
+<!-- Additional context, constraints, or details from spec -->
 
 ## History
 
@@ -45,3 +30,4 @@ In Progress
 - Items List View (context/features/item-list-view-spec.md): new dynamic route `/items/[type]` (e.g. `/items/snippets`) showing a responsive 2-column grid (`md:`) of type-filtered `ItemCard`s, each with a left border colored by the item type (`accentBorder` prop on `ItemCard`); added `getItemsByType`/`getItemTypeBySlug` (`lib/db/items.ts`, `lib/db/item-types.ts`) and shared `typeSlug` helper (`lib/item-type-slug.ts`); sidebar "Types" links now highlight the active type via `usePathname`; grid/list `ViewToggle` moved off the global `TopBar` (where it only worked on the dashboard) onto each page's own header row (dashboard and items/[type]) so it's wired to that page's own content
 - Vitest setup: added `vitest.config.ts` (native `resolve.tsconfigPaths` for the `@/*` alias, no extra plugin) and `pnpm test` script; tests scoped to server actions and utils only (no components) — `lib/item-type-slug.test.ts`, `lib/utils.test.ts`, `actions/account.test.ts` (mocks `@clerk/nextjs/server` and `@/db`); added `test/fixtures/user.ts` with a shared fake Clerk user for bypassing auth in tests; updated `context/ai-interaction.md` (new "Unit Testing" section, workflow step 4) and `CLAUDE.md` commands
 - Item Drawer (context/features/item-drawer-spec.md): right-side shadcn `Sheet` opens on `ItemCard` click on both dashboard and `/items/[type]`, replacing the old (non-existent) item detail page; full item detail fetched via server action (`actions/items.ts` `getItemDetail`, backed by `lib/db/items.ts` `getItemById`) with a loading skeleton; action bar (Copy/Edit-placeholder/Favorite/Pin/Delete) wired to `setItemFavorite`/`setItemPinned`/`deleteItem` server actions with optimistic local state + `router.refresh()`; `ItemDrawerProvider` client context (`components/dashboard/item-drawer-provider.tsx`) mounted in the dashboard layout holds open/selected-item state since pages rendering `ItemCard` are server components; drawer width is resizable and persisted per-viewer via shadcn's `resizable` (`react-resizable-panels`, `components/ui/resizable.tsx`) rather than a hand-rolled drag handler, after discovering Base UI's `Dialog.Popup` silently drops the `style` prop (root cause of two earlier failed resize attempts)
+- Item Drawer Edit Mode (context/features/item-drawer-edit-spec.md): Edit button swaps the drawer's action bar for Save/Cancel and turns the display fields into inline inputs (Title/Description/Tags for all types; type-conditional Content/Language/URL); `updateItem` server action (`actions/items.ts`, Zod-validated) + `lib/db/items.ts` query function (tag reconciliation: delete all `itemTags`, find-or-create each tag) — written as sequential queries rather than `db.transaction()` since the `neon-http` driver doesn't support transactions; comma-to-pill tag input with deterministic per-tag colors (`lib/tag-colors.ts`, also applied to `ItemCard` everywhere); unsaved-changes guard via a shadcn `AlertDialog` (added `alert-dialog`, `popover`, `command`, `input-group`, `textarea` components) with explicit "Keep editing"/"Discard changes" actions, replacing an earlier `window.alert`/`confirm`; Language field is a `Popover`+`Command` combobox (`components/dashboard/language-combobox.tsx`) that autocompletes from `getDistinctLanguages` or creates a new value; sonner `Toaster` added to the root layout (mounted in `app/layout.tsx`) for save success/error toasts, with colored icons (emerald success, destructive error)
