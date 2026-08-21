@@ -74,7 +74,7 @@ export function AppSidebar({
           favoriteCount={favoriteCount}
         />
         <SidebarCollections collections={collections} />
-        <SidebarTypes itemTypes={itemTypes} />
+        <SidebarTypes itemTypes={itemTypes} pathname={pathname} />
         <SidebarTags tags={tags} />
       </SidebarContent>
 

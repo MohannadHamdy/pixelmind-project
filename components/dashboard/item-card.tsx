@@ -44,16 +44,22 @@ function ItemStatusIcons({
 export function ItemCard({
   item,
   view = "grid",
+  accentBorder = false,
 }: {
   item: ItemWithRelations
   view?: "grid" | "list"
+  accentBorder?: boolean
 }) {
   const TypeIcon = iconsByName[item.type.icon] ?? FileIcon
+  const accentStyle = accentBorder
+    ? { borderLeft: `4px solid ${item.type.color}` }
+    : undefined
 
   if (view === "list") {
     return (
       <Card
         size="sm"
+        style={accentStyle}
         className="cursor-pointer flex-row items-center gap-3 rounded-2xl px-4 py-3 transition-all duration-200 hover:-translate-y-0.5 hover:ring-2 hover:ring-foreground/10"
       >
         <TypeIcon
@@ -86,6 +92,7 @@ export function ItemCard({
   return (
     <Card
       size="sm"
+      style={accentStyle}
       className="cursor-pointer rounded-2xl transition-all duration-200 hover:-translate-y-0.5 hover:ring-2 hover:ring-foreground/10"
     >
       <CardHeader className="flex-row items-start justify-between gap-2 space-y-0">

@@ -30,12 +30,18 @@ export interface ItemWithRelations {
 
 async function findItems(
   userId: string,
-  { pinnedOnly, limit }: { pinnedOnly?: boolean; limit?: number }
+  {
+    pinnedOnly,
+    limit,
+    typeId,
+  }: { pinnedOnly?: boolean; limit?: number; typeId?: string }
 ): Promise<ItemWithRelations[]> {
+  const conditions = [eq(items.userId, userId)]
+  if (pinnedOnly) conditions.push(eq(items.isPinned, true))
+  if (typeId) conditions.push(eq(items.typeId, typeId))
+
   const rows = await db.query.items.findMany({
-    where: pinnedOnly
-      ? and(eq(items.userId, userId), eq(items.isPinned, true))
-      : eq(items.userId, userId),
+    where: and(...conditions),
     orderBy: [desc(items.updatedAt)],
     limit,
     with: {
@@ -74,6 +80,10 @@ export const getPinnedItems = cache((userId: string) =>
 
 export const getRecentItems = cache((userId: string, limit = 10) =>
   findItems(userId, { limit })
+)
+
+export const getItemsByType = cache((userId: string, typeId: string) =>
+  findItems(userId, { typeId })
 )
 
 export interface ItemStats {

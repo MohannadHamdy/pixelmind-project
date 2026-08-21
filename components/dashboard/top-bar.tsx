@@ -1,7 +1,5 @@
 "use client"
 
-import { Suspense } from "react"
-
 import {
   MagnifyingGlassIcon,
   PlusIcon,
@@ -9,7 +7,6 @@ import {
 } from "@phosphor-icons/react/dist/ssr"
 
 import { ThemeToggle } from "@/components/dashboard/theme-toggle"
-import { ViewToggle } from "@/components/dashboard/view-toggle"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { SidebarTrigger, useSidebar } from "@/components/ui/sidebar"
@@ -34,9 +31,6 @@ export function TopBar() {
           <SparkleIcon weight="fill" />
           AI
         </Button>
-        <Suspense fallback={null}>
-          <ViewToggle />
-        </Suspense>
         <ThemeToggle />
         <Button data-icon="inline-start">
           <PlusIcon />

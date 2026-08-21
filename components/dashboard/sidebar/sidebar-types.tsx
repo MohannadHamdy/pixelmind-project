@@ -9,13 +9,16 @@ import {
 import { Badge } from "@/components/ui/badge"
 import { SidebarSection } from "@/components/dashboard/sidebar/sidebar-section"
 import type { ItemTypeSummary } from "@/lib/db/item-types"
+import { typeSlug } from "@/lib/item-type-slug"
 import { iconsByName } from "@/lib/type-icons"
 
-function typeSlug(name: string) {
-  return `${name.toLowerCase()}s`
-}
-
-export function SidebarTypes({ itemTypes }: { itemTypes: ItemTypeSummary[] }) {
+export function SidebarTypes({
+  itemTypes,
+  pathname,
+}: {
+  itemTypes: ItemTypeSummary[]
+  pathname: string
+}) {
   return (
     <SidebarSection title="Types" storageKey="types">
       <SidebarMenu>
@@ -24,9 +27,11 @@ export function SidebarTypes({ itemTypes }: { itemTypes: ItemTypeSummary[] }) {
           const isProType =
             type.name.toLowerCase() === "file" ||
             type.name.toLowerCase() === "image"
+          const isActive = pathname === `/items/${typeSlug(type.name)}`
           return (
             <SidebarMenuItem key={type.id}>
               <SidebarMenuButton
+                isActive={isActive}
                 render={<Link href={`/items/${typeSlug(type.name)}`} />}
                 tooltip={type.name}
               >
