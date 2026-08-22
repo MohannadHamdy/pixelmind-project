@@ -74,7 +74,7 @@ export function TagInput({
         onChange={(e) => handleDraftChange(e.target.value)}
         onKeyDown={handleKeyDown}
         placeholder="Add a tag, then press comma"
-        className="min-w-24 flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
+        className="min-w-24 flex-1 bg-transparent text-base outline-none placeholder:text-muted-foreground md:text-sm"
       />
     </div>
   )
