@@ -1,3 +1,4 @@
+import type { Viewport } from "next"
 import { ClerkProvider } from "@clerk/nextjs"
 import { shadcn } from "@clerk/ui/themes"
 import { Geist_Mono, DM_Sans, Roboto } from "next/font/google"
@@ -6,6 +7,12 @@ import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
 import { Toaster } from "@/components/ui/sonner"
 import { cn } from "@/lib/utils"
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+}
 
 const robotoHeading = Roboto({ subsets: ["latin"], variable: "--font-heading" })
 
